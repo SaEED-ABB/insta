@@ -1,0 +1,70 @@
+create table "questions"(
+    id         serial primary key,
+    context    char(255) not null
+);
+
+
+create table "users"(
+    email       char(255) not null,
+    username    char(50) not null,
+    password    char(255) not null,
+    bio         char(255),
+    type        int not null,
+    answer      char(255) not null,
+    question_id  int references questions(id)
+);
+
+
+create table "posts"(
+    id          serial primary key,
+    date        time not null,
+    caption     char(255) not null,
+    user_id     int references users(id)
+);
+
+
+create table "comments"(
+    id          serial primary key,
+    date        time not null,
+    context     char(255) not null,
+    post_id     int references posts(id) not null,
+    user_id     int references users(id) not null,
+    parent_id   int references comments(id)
+);
+
+
+create table "post_likes"(
+    id          serial primary key,
+    post_id     int references posts(id) not null,
+    user_id     int references users(id) not null
+);
+
+
+create table "comments_likes"(
+    id          serial primary key,
+    comment_id  int references posts(id) not null,
+    user_id     int references users(id) not null
+);
+
+
+create table "follows"(
+    id                  serial primary key,
+    date                time not null,
+    user_id             int references users(id) not null,
+    following_user_id   int references users(id) not null
+);
+
+
+create table "blocks"(
+    id                  serial primary key,
+    date                time not null,
+    user_id             int references users(id) not null,
+    blocked_user_id     int references users(id) not null
+);
+
+
+create table "hash_tags"(
+    id          serial primary key,
+    hash_tag    char(255) not null,
+    post_id     int references posts(id) not null
+);

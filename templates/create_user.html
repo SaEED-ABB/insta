@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>insta | sign up</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+{#    <link rel="stylesheet" href="{% static 'css/base.css' %}">#}
+</head>
+<body>
+    <div class="container form-group signUpContainer">
+        <label class="signUpLabel">Email</label>
+        <input type="email" id="emailSignUp" class="form-control">
+
+        <label class="signUpLabel">Username</label>
+        <input type="text" id="usernameSignUp" class="form-control">
+
+        <label class="signUpLabel">Password</label>
+        <input type="password" id="passwordSignUp" class="form-control" name="password1">
+
+        <label class="signUpLabel">Repeat Password</label>
+        <input type="password" id="confirm" class="form-control" name="password2">
+
+        <label class="signUpLabel">Type</label>
+        <input type="text" id="typeSignUp" class="form-control">
+
+        <label class="signUpLabel">Answer</label>
+        <input type="text" id="answerSignUp" class="form-control">
+
+
+        <button type="submit" id="signUp_BTN" class="btn  signUpButton">JOIN NOW</button>
+    </div>
+
+    <script>
+        window.onload = function () {
+            var signUp_BTN = document.getElementById("signUp_BTN");
+            signUp_BTN.onclick = function () {
+                var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 200 ){
+                        var result = JSON.parse(this.responseText);
+                        alert(result);
+                    }
+                };
+                XML.open("POST","/users/create/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var email = document.getElementById("emailSignUp").value;
+                var username = document.getElementById("usernameSignUp").value;
+                var password = document.getElementById("passwordSignUp").value;
+                var repeatPass = document.getElementById("confirm").value;
+                var type = document.getElementById("typeSignUp").value;
+                var answer = document.getElementById("answerSignUp").value;
+
+                if(password === repeatPass) {
+                    var text = "email=" + email + "&username=" + username + "&password1=" + password + "&password2=" + repeatPass + "&type=" + type + "&answer=" + answer;
+                    XML.send(text);
+                }else {
+                    alert("confirm password does not match");
+                }
+            };
+        };
+    </script>
+
+</body>
+</html>
+
