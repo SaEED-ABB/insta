@@ -21,13 +21,37 @@ def get_users_query():
     return rows
 
 
-def create_user_query(**kwargs):
-    int_columns = ['id', 'type']
-    columns = "({})".format(','.join(kwargs.keys()))
-    values = "({})".format(','.join([(value if column in int_columns else "'{}'".format(value)) for column, value in kwargs.items()]))
-    query = """INSERT INTO users {} VALUES {};""".format(columns, values)
+def create_question_query(context):
+    columns = "(context)"
+    values = "('%s')" % context
+    query = """INSERT INTO questions %s VALUES %s RETURNING id;""" % (columns, values)
+    cursor = get_database_connection()
+    cursor.execute(query)
+    id = cursor.fetchone()
+    return id[0]
+
+
+def create_user_query(email, username, password, type, question_id=None, answer=None, bio=None):
+    columns = "(email, username, password, type, question_id, answer, bio)"
+    values = "('%s', '%s', '%s', %s, %s, '%s', '%s')" % (email, username, password, type, question_id, answer, bio)
+    query = """INSERT INTO users %s VALUES %s RETURNING id;""" % (columns, values)
 
     cursor = get_database_connection()
     cursor.execute(query)
+    id = cursor.fetchone()
+    return id[0]
 
 
+def create_post_query(caption, user_id):
+    columns = "(caption, user_id)"
+    values = "('%s', %s)" % (caption, user_id)
+    query = """INSERT INTO posts %s VALUES %s RETURNING id;""" % (columns, values)
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    id = cursor.fetchone()
+    return id[0]
+
+
+def create_comment_query(**kwargs):
+    pass

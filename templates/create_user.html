@@ -52,7 +52,7 @@
                 var answer = document.getElementById("answerSignUp").value;
 
                 if(password === repeatPass) {
-                    var text = "email=" + email + "&username=" + username + "&password1=" + password + "&password2=" + repeatPass + "&type=" + type + "&answer=" + answer;
+                    var text = "email=" + email + "&username=" + username + "&password=" + password + "&password2=" + repeatPass + "&type=" + type + "&answer=" + answer;
                     XML.send(text);
                 }else {
                     alert("confirm password does not match");

@@ -76,8 +76,8 @@ WSGI_APPLICATION = 'insta.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DB_NAME = 'insta'
-DB_USER = 'najme'
-DB_PASSWORD = '1234qwer'
+DB_USER = 'postgres'
+DB_PASSWORD = 'postgres'
 DB_HOST = 'localhost'
 
 DATABASES = {
