@@ -143,7 +143,8 @@ def get_users_followed_back_all_their_followers_query():
     cursor = get_database_connection()
     cursor.execute(query)
     rows = cursor.fetchall()
-    return rows
+    users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
+    return users
 
 
 def get_last_posts_of_following_users_query(user_id):

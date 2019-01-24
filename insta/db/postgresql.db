@@ -1,6 +1,6 @@
 create table "questions"(
     id         serial primary key,
-    context    char(255) unique not null
+    context    varchar unique not null
 );
 
 
@@ -9,13 +9,13 @@ create type "user_type" as enum ('user', 'admin', 'analyst');
 
 create table "users"(
     id              serial primary key,
-    email           char(255) unique not null,
-    username        char(50) unique not null,
-    password        char(255) not null,
+    email           varchar unique not null,
+    username        varchar unique not null,
+    password        varchar not null,
     type            user_type not null,
     question_id     int references questions(id) not null,
-    answer          char(255) not null,
-    bio             char(255)
+    answer          varchar not null,
+    bio             varchar
 );
 
 
@@ -75,6 +75,6 @@ create table "blocks"(
 
 create table "hash_tags"(
     id          serial primary key,
-    hash_tag    char(255) not null,
+    hash_tag    varchar not null,
     post_id     int references posts(id) not null
 );
