@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>Nstagram</title>
+    <link rel="stylesheet" href="{% static 'assets/css/plugin.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+</head>
+<body>
+<div class="page-panel">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-center">
+        <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
+            Nstagram
+        </p>
+    </nav>
+    <div class="container p-t-15 p-b-15">
+        <div class="row justify-content-center">
+            <div class="col-4">
+                <div class="card" >
+                    <div class="card-body text-center">
+                        <a href="">
+                            <h5 class="card-title">پوریا صادقی</h5>
+                            <span class="f-s-12">@pooria</span>
+                        </a>
+                    </div>
+                    <hr class="m-0" >
+                    <div class="card-body">
+                        <div class="row row-4">
+                            <div class="col-6 m-b-5">
+                                <a href="" class="w-100 float-right btn btn-success btn-sm" >
+                                    120 دنبال شونده
+                                </a>
+                            </div>
+                            <div class="col-6 m-b-5">
+                                <a href="" class="w-100 float-left btn btn-success btn-sm" >
+                                    120 دنبال کننده
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="" class="w-100 float-right btn btn-success btn-sm" >
+                                    100 لایک
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="" class="w-100 float-left btn btn-success btn-sm" >
+                                    20 پست
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="m-0" >
+                    <div class="card-body">
+                        <ul class="m-0 f-s-15" >
+                            <li><a class="font-weight-bold m-b-10 d-block" href="">جستجو</a></li>
+                            <li><a class=" m-b-10 d-block" href="">تغییر کلمه عبور</a></li>
+                            <li><a class="" href="">خروج</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card m-b-15" >
+                    <div class="card-body">
+                        <div class="form-group m-0">
+                            <div class="row row-4">
+                                <div class="col">
+                                    <input type="text" class="form-control" placeholder="متن..." >
+                                </div>
+                                <div class="col-2">
+                                    <button class="btn btn-outline-secondary w-100" type="button" >
+                                        <i class="fa fa-search" ></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" >
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link " href="#">پیام ها</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">کاربران</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tweet">
+                            <div class="clearfix" >
+                                <a href="" class="name float-right">
+                                    <span class="name">پوریا صادقی</span>
+                                    <span class="username">@pooria</span>
+                                </a>
+                                <time class="float-left" >150 پست</time>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="m-0" >
+                    <div class="card-body"></div>
+                </div>
+                <a href="" class="btn btn-sm btn-outline-primary m-t-15 w-100">موارد بیشتر</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'assets/js/lib/jquery.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/lib/popper.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/lib/bootstrap.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/helper.js' %}" ></script>
+</body>
+</html>

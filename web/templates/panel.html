@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>Nstagram</title>
+    <link rel="stylesheet" href="{% static 'assets/css/plugin.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+</head>
+<body>
+<div class="page-panel">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-center">
+        <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
+            Nstagram
+        </p>
+    </nav>
+    <div class="container p-t-15 p-b-15">
+        <div class="row justify-content-center">
+            <div class="col-4">
+                <div class="card" >
+                    <div class="card-body text-center">
+                        <a href="">
+                            <h4 class="card-title">مدیر کل</h4>
+                        </a>
+                    </div>
+                    <hr class="m-0" >
+                    <div class="card-body">
+                        <ul class="m-0 f-s-15" >
+                            <li><a class="m-b-10 d-block" href="">کاربران</a></li>
+                            <li><a class="m-b-10 d-block" href="">توئیت ها</a></li>
+                            <li><a class=" m-b-10 d-block" href="">تغییر کلمه عبور</a></li>
+                            <li><a class="" href="">خروج</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card" >
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover table-striped" >
+                            <thead>
+                            <tr>
+                                <th>ردیف</th>
+                                <th>نام</th>
+                                <th>ایمیل</th>
+                                <th>توئیت ها</th>
+                                <th>دنبال شونده ها</th>
+                                <th>دنبال کننده ها</th>
+                                <th>
+
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>
+                                    <a href="">@pooria</a>
+                                </td>
+                                <td>test@test.com</td>
+                                <td>
+                                    <a href="">10</a>
+                                </td>
+                                <td>
+                                    <a href="">20</a>
+                                </td>
+                                <td>
+                                    <a href="">40</a>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" >
+                                        Block
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" >
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'assets/js/lib/jquery.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/lib/popper.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/lib/bootstrap.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/helper.js' %}" ></script>
+</body>
+</html>

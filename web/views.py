@@ -10,3 +10,13 @@ def user_list(request):
     users = database.get_users_query()
     return render(request, 'user_list.html', {'users': users})
 
+
+def register_user(request):
+    return render(request, 'register.html')
+
+
+def create_post(request):
+    return render(request, 'user.html')
+
+def like_post(request):
+    return render(request, 'user.html')

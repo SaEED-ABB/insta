@@ -1,0 +1,48 @@
+.page-login{
+  display: table;
+  width: 100%;
+  >div{
+    display: table-cell;
+    width: 50%;
+    @include set_vertical(middle);
+    &.image{
+      overflow: hidden;
+      background: #4e55ff;
+      color: #9594ff;
+      font-size: 200px;
+      position: relative;
+      @include set_webkit(text-shadow, 100px -100px 1px rgba(255, 255, 255, 0.1));
+      >span{
+        position: absolute;
+        left: 0;
+        top: 300px;
+        @include set_transform(rotate(45deg));
+      }
+    }
+  }
+}
+.page-register{
+  display: table;
+  width: 100%;
+  direction: ltr;
+  >div{
+    direction: rtl;
+    display: table-cell;
+    width: 50%;
+    @include set_vertical(middle);
+    &.image{
+      overflow: hidden;
+      background: #4e55ff;
+      color: #9594ff;
+      font-size: 200px;
+      position: relative;
+      @include set_webkit(text-shadow, 100px -100px 1px rgba(255, 255, 255, 0.1));
+      >span{
+        position: absolute;
+        left: 0;
+        top: 300px;
+        @include set_transform(rotate(-45deg));
+      }
+    }
+  }
+}
