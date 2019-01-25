@@ -8,3 +8,5 @@ from .like_comment import like_comment
 from .follow_user import follow_user
 from .block_user import block_user
 from .get_users_followed_back_all_their_followers import get_users_followed_back_all_their_followers
+from .get_users_whose_following_users_are_active import get_users_whose_following_users_are_active
+from .get_last_posts_of_following_users import get_last_posts_of_following_users

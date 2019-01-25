@@ -13,5 +13,7 @@ urlpatterns = [
     path('users/block/', views.block_user, name='block_user'),
     path('hash_tags/create/', views.create_hash_tag, name='create_hash_tag'),
     path('users/followed_back_all_their_followers/', views.get_users_followed_back_all_their_followers, name='get_users_followed_back_all_their_followers'),
+    path('users/whose_following_users_are_active/', views.get_users_whose_following_users_are_active, name='get_users_whose_following_users_are_active'),
+    path('users/last_posts_of_following_users/', views.get_last_posts_of_following_users, name='get_last_posts_of_following_users'),
 
 ]

@@ -138,7 +138,32 @@ def get_user_type_query(user_id):
 
 
 def get_users_followed_back_all_their_followers_query():
-    query = """SELECT * FROM users WHERE ((SELECT user_id FROM follows WHERE following_user_id = users.id) in (SELECT following_user_id FROM follows WHERE user_id = users.id));"""
+    # query = """WITH followers AS (SELECT user_id FROM follows WHERE following_user_id = users.id),
+    # followings AS (SELECT following_user_id FROM follows WHERE user_id = users.id)
+    # SELECT * FROM users WHERE (followers) IN (followings);"""
+    query = """SELECT * FROM users WHERE 
+    (SELECT user_id FROM follows WHERE following_user_id = users.id) 
+    IN 
+    (SELECT following_user_id FROM follows WHERE user_id = users.id);"""
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
+    return users
+
+
+def get_users_whose_following_users_are_active_query():
+    query = """SELECT * FROM users WHERE 
+    users.id 
+    IN 
+    (SELECT following_user_id FROM follows WHERE 
+        (follows.user_id = users.id) 
+        AND 
+        (follows.user_id IN 
+            (SELECT user_id FROM posts WHERE posts.date > NOW() - INTERVAL '24 hour')
+        )
+    );"""
 
     cursor = get_database_connection()
     cursor.execute(query)
@@ -148,5 +173,12 @@ def get_users_followed_back_all_their_followers_query():
 
 
 def get_last_posts_of_following_users_query(user_id):
-    following_users = """SELECT following_user_id FROM follows WHERE user_id = %s""" % user_id
-    query = """SELECT * FROM users WHERE """
+    query = """SELECT * FROM posts WHERE 
+    user_id IN (SELECT following_user_id FROM follows WHERE user_id = %s)
+    ORDER BY posts.date DESC LIMIT 100;""" % user_id
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    posts = [dict(zip(('id', 'date', 'context', 'user_id'), row)) for row in rows]
+    return posts
