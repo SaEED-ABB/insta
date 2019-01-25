@@ -12,3 +12,5 @@ from .get_users_whose_following_users_are_active import get_users_whose_followin
 from .get_last_posts_of_following_users import get_last_posts_of_following_users
 from .get_all_posts_of_a_user import get_all_posts_of_a_user
 from .get_post_details import get_post_details
+from .login_user import login_user
+from .logout_user import logout_user

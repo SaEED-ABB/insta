@@ -241,3 +241,12 @@ def get_post_details_query(post_id):
     result['post']['comments_count'] = len(comments)
 
     return result
+
+
+def get_user_id_for_login_query(username, password):
+    query = """SELECT id FROM users WHERE username = '%s' AND password = '%s';""" % (username, password)
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    id = cursor.fetchone()
+    return id[0]

@@ -17,5 +17,7 @@ urlpatterns = [
     path('users/last_posts_of_following_users/', views.get_last_posts_of_following_users, name='get_last_posts_of_following_users'),
     path('users/all_posts_of_a_user/', views.get_all_posts_of_a_user, name='get_all_posts_of_a_user'),
     path('users/post_details/', views.get_post_details, name='get_post_details'),
+    path('users/login/', views.login_user, name='login_user'),
+    path('users/logout/', views.logout_user, name='logout_user'),
 
 ]
