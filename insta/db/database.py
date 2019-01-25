@@ -173,12 +173,71 @@ def get_users_whose_following_users_are_active_query():
 
 
 def get_last_posts_of_following_users_query(user_id):
-    query = """SELECT * FROM posts WHERE 
-    user_id IN (SELECT following_user_id FROM follows WHERE user_id = %s)
+    query = """SELECT posts.id, posts.date, posts.context, posts.user_id, users.username, 
+    (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id), 
+    (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id)
+    FROM posts 
+    INNER JOIN users ON posts.user_id = users.id
+    WHERE posts.user_id IN (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s)
     ORDER BY posts.date DESC LIMIT 100;""" % user_id
 
     cursor = get_database_connection()
     cursor.execute(query)
     rows = cursor.fetchall()
-    posts = [dict(zip(('id', 'date', 'context', 'user_id'), row)) for row in rows]
+    posts = [dict(zip(('id', 'date', 'context', 'user_id', 'user_username', 'likes_count', 'comments_count'), row)) for row in rows]
     return posts
+
+
+def get_all_posts_of_a_user_query(user_id):
+    query = """SELECT posts.id, posts.date, posts.context, 
+        (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id), 
+        (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id)
+        FROM posts 
+        INNER JOIN users ON posts.user_id = users.id
+        WHERE posts.user_id = %s
+        ORDER BY posts.date DESC;""" % user_id
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    posts = [dict(zip(('id', 'date', 'context', 'likes_count', 'comments_count'), row)) for row in rows]
+    return posts
+
+
+def get_post_details_query(post_id):
+    result = {}
+
+    q1_post_detail = """SELECT posts.*, users.username 
+    FROM posts 
+    INNER JOIN users ON posts.user_id = users.id
+    WHERE posts.id = %s;""" % post_id
+
+    q2_post_likes = """SELECT posts_likes.user_id, users.username 
+    FROM posts_likes 
+    INNER JOIN users ON posts_likes.user_id = users.id
+    WHERE posts_likes.post_id = %s;""" % post_id
+
+    q3_post_comments = """SELECT comments.date, comments.user_id, comments.parent_id, users.username,
+    (SELECT COUNT(*) FROM comments_likes WHERE comments.id = comments_likes.comment_id) 
+    FROM comments 
+    INNER JOIN users ON comments.user_id = users.id
+    WHERE comments.post_id = %s;""" % post_id
+
+    cursor = get_database_connection()
+    cursor.execute(q1_post_detail)
+    row = cursor.fetchone()
+    result['post'] = dict(zip(('id', 'date', 'context', 'user_id', 'user_username'), row))
+
+    cursor.execute(q2_post_likes)
+    rows = cursor.fetchall()
+    likes = [dict(zip(('liker_id', 'liker_username'), row)) for row in rows]
+    result['post']['likes'] = likes
+    result['post']['likes_count'] = len(likes)
+
+    cursor.execute(q3_post_comments)
+    rows = cursor.fetchall()
+    comments = [dict(zip(('date', 'user_id', 'parent_id', 'user_username'), row)) for row in rows]
+    result['post']['comments'] = comments
+    result['post']['comments_count'] = len(comments)
+
+    return result
