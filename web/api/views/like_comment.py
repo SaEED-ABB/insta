@@ -11,6 +11,6 @@ def like_comment(request):
     if not user_id:
         return JsonResponse({'error': "please login first"}, status=403)
 
-    comment_id = database.like_comment_query(comment_id=comment_id, user_id=user_id)
+    comment_likes_count = database.like_comment_query(comment_id=comment_id, user_id=user_id)
 
-    return JsonResponse({'id': comment_id}, status=201)
+    return JsonResponse({'comment_likes_count': comment_likes_count}, status=201)

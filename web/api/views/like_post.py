@@ -11,6 +11,6 @@ def like_post(request):
     if not user_id:
         return JsonResponse({'error': "please login first"}, status=403)
 
-    like_id = database.like_post_query(post_id=post_id, user_id=user_id)
+    post_likes_count = database.like_post_query(post_id=post_id, user_id=user_id)
 
-    return JsonResponse({'id': like_id}, status=201)
+    return JsonResponse({'post_likes_count': post_likes_count}, status=201)

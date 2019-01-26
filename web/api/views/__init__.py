@@ -15,3 +15,4 @@ from .get_post_details import get_post_details
 from .login_user import login_user
 from .logout_user import logout_user
 from .get_hottest_posts import get_hottest_posts
+from .search_username import search_username

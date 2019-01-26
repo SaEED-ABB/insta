@@ -11,7 +11,7 @@ def block_user(request):
         return JsonResponse({'error': "please login first"}, status=403)
     blocked_user_id = request.POST['blocked_user_id']
 
-    block_id = database.block_user_query(user_id=user_id, blocked_user_id=blocked_user_id)
+    blocked_count = database.block_user_query(user_id=user_id, blocked_user_id=blocked_user_id)
 
-    return JsonResponse({'id': block_id}, status=201)
+    return JsonResponse({'blocked_count': blocked_count}, status=201)
 

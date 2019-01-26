@@ -74,47 +74,76 @@ def create_comment_query(context, parent_id, user_id, post_id):
 
 
 def like_post_query(post_id, user_id):
-    columns = "(post_id, user_id)"
-    values = "(%s, %s)" % (post_id, user_id)
-    query = """INSERT INTO posts_likes %s VALUES %s RETURNING id;""" % (columns, values)
-
     cursor = get_database_connection()
-    cursor.execute(query)
-    id = cursor.fetchone()
-    return id[0]
+    try:
+        columns = "(post_id, user_id)"
+        values = "(%s, %s)" % (post_id, user_id)
+        q_do_like = """INSERT INTO posts_likes %s VALUES %s;""" % (columns, values)
+        cursor.execute(q_do_like)
+    except:
+        q_do_unlike = """DELETE FROM posts_likes WHERE post_id = %s AND user_id = %s;""" % (post_id, user_id)
+        cursor.execute(q_do_unlike)
+
+    q_post_likes_count = """SELECT COUNT(*) FROM posts_likes WHERE post_id = %s;""" % post_id
+    cursor.execute(q_post_likes_count)
+    post_likes_count = cursor.fetchone()
+
+    return post_likes_count[0]
+
 
 
 def like_comment_query(comment_id, user_id):
-    columns = "(comment_id, user_id)"
-    values = "(%s, %s)" % (comment_id, user_id)
-    query = """INSERT INTO comments_likes %s VALUES %s RETURNING id;""" % (columns, values)
-
     cursor = get_database_connection()
-    cursor.execute(query)
-    id = cursor.fetchone()
-    return id[0]
+    try:
+        columns = "(comment_id, user_id)"
+        values = "(%s, %s)" % (comment_id, user_id)
+        q_do_like = """INSERT INTO comments_likes %s VALUES %s;""" % (columns, values)
+        cursor.execute(q_do_like)
+    except:
+        q_do_unlike = """DELETE FROM comments_likes WHERE comment_id = %s AND user_id = %s;""" % (comment_id, user_id)
+        cursor.execute(q_do_unlike)
+
+    q_comment_likes_count = """SELECT COUNT(*) FROM comments_likes WHERE comment_id = %s;""" % comment_id
+    cursor.execute(q_comment_likes_count)
+    comment_likes_count = cursor.fetchone()
+
+    return comment_likes_count[0]
 
 
 def follow_user_query(user_id, following_user_id):
-    columns = "(user_id, following_user_id)"
-    values = "(%s, %s)" % (user_id, following_user_id)
-    query = """INSERT INTO follows %s VALUES %s RETURNING id;""" % (columns, values)
-
     cursor = get_database_connection()
-    cursor.execute(query)
-    id = cursor.fetchone()
-    return id[0]
+    try:
+        columns = "(user_id, following_user_id)"
+        values = "(%s, %s)" % (user_id, following_user_id)
+        q_do_follow = """INSERT INTO follows %s VALUES %s;""" % (columns, values)
+        cursor.execute(q_do_follow)
+    except:
+        q_do_unfollow = """DELETE FROM follows WHERE user_id = %s AND following_user_id = %s;""" % (user_id, following_user_id)
+        cursor.execute(q_do_unfollow)
+
+    q_followings_count = """SELECT COUNT(*) FROM follows WHERE user_id = %s;""" % user_id
+    cursor.execute(q_followings_count)
+    followings_count = cursor.fetchone()
+
+    return followings_count[0]
 
 
 def block_user_query(user_id, blocked_user_id):
-    columns = "(user_id, blocked_user_id)"
-    values = "(%s, %s)" % (user_id, blocked_user_id)
-    query = """INSERT INTO blocks %s VALUES %s RETURNING id;""" % (columns, values)
-
     cursor = get_database_connection()
-    cursor.execute(query)
-    id = cursor.fetchone()
-    return id[0]
+    try:
+        columns = "(user_id, blocked_user_id)"
+        values = "(%s, %s)" % (user_id, blocked_user_id)
+        q_do_block = """INSERT INTO blocks %s VALUES %s;""" % (columns, values)
+        cursor.execute(q_do_block)
+    except:
+        q_do_unblock = """DELETE FROM blocks WHERE user_id = %s AND blocked_user_id = %s;""" % (user_id, blocked_user_id)
+        cursor.execute(q_do_unblock)
+
+    q_blocked_count = """SELECT COUNT(*) FROM blocks WHERE user_id = %s;""" % user_id
+    cursor.execute(q_blocked_count)
+    blocked_count = cursor.fetchone()
+
+    return blocked_count[0]
 
 
 def create_hash_tag_query(hash_tag, post_id):
@@ -330,3 +359,15 @@ def get_hottest_posts_query(order_by_date):
     rows = cursor.fetchall()
     posts = [dict(zip(('id', 'date', 'context', 'user_id', 'user_username', 'likes_count', 'comments_count', 'comments_likes_count'), row)) for row in rows]
     return posts
+
+
+def search_username_query(username):
+    pattern = '%'.join(username.strip().split())
+    pattern = '%{}%'.format(pattern)
+    query = """SELECT * FROM users WHERE (users.username ILIKE '{}') OR ('{}' LIKE '%' || users.username || '%');""".format(pattern, username)
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
+    return users

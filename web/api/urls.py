@@ -20,5 +20,6 @@ urlpatterns = [
     path('users/login/', views.login_user, name='login_user'),
     path('users/logout/', views.logout_user, name='logout_user'),
     path('posts/hottest/', views.get_hottest_posts, name='get_hottest_posts'),
+    path('users/search_username/', views.search_username, name='search_username'),
 
 ]
