@@ -4,8 +4,8 @@ from django.views.decorators.http import require_GET
 
 
 @require_GET
-def get_all_posts_of_a_user(request):
+def get_user_page_info(request):
     user_id = request.GET['user_id']
 
-    posts = database.get_all_posts_of_a_user_query(user_id=user_id)
-    return JsonResponse({'posts': posts}, status=200)
+    result = database.get_user_page_info_query(user_id=user_id)
+    return JsonResponse({'user_page': result}, status=200)

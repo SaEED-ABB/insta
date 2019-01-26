@@ -188,8 +188,10 @@ def get_last_posts_of_following_users_query(user_id):
     return posts
 
 
-def get_all_posts_of_a_user_query(user_id):
-    query = """SELECT posts.id, posts.date, posts.context, 
+def get_user_page_info_query(user_id):
+    result = {}
+
+    q1_posts = """SELECT posts.id, posts.date, posts.context, 
         (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id), 
         (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id)
         FROM posts 
@@ -197,11 +199,36 @@ def get_all_posts_of_a_user_query(user_id):
         WHERE posts.user_id = %s
         ORDER BY posts.date DESC;""" % user_id
 
+    q2_followers = """SELECT follows.following_user_id, users.username 
+        FROM follows 
+        INNER JOIN users ON users.id = follows.following_user_id
+        WHERE follows.user_id = %s;""" % user_id
+
+    q3_followings = """SELECT follows.user_id, users.username 
+    FROM follows 
+    INNER JOIN users ON users.id = follows.user_id
+    WHERE follows.following_user_id = %s;""" % user_id
+
     cursor = get_database_connection()
-    cursor.execute(query)
+    cursor.execute(q1_posts)
     rows = cursor.fetchall()
     posts = [dict(zip(('id', 'date', 'context', 'likes_count', 'comments_count'), row)) for row in rows]
-    return posts
+    result['posts'] = posts
+    result['posts_count'] = len(posts)
+
+    cursor.execute(q2_followers)
+    rows = cursor.fetchall()
+    followers = [dict(zip(('id', 'username'), row)) for row in rows]
+    result['followers'] = followers
+    result['followers_count'] = len(followers)
+
+    cursor.execute(q3_followings)
+    rows = cursor.fetchall()
+    followings = [dict(zip(('id', 'username'), row)) for row in rows]
+    result['followings'] = followings
+    result['followings_count'] = len(followings)
+
+    return result
 
 
 def get_post_details_query(post_id):
