@@ -13,6 +13,7 @@
         <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
             Nstagram
         </p>
+        <button class="btn btn-outline-secondary btn-sm align-left" id="loginButton">ورود</button>
     </nav>
     <div class="container p-t-15 p-b-15">
         <div class="row justify-content-center">
@@ -20,27 +21,25 @@
                 <div class="card" >
                     <div class="card-body text-center">
                         <a href="">
-                            <h5 class="card-title">پوریا صادقی</h5>
-                            <span class="f-s-12">@pooria</span>
+                            <h5 class="card-title" id="username"></h5>
                         </a>
                     </div>
                     <hr class="m-0" >
                     <div class="card-body">
                         <div class="row row-4">
                             <div class="col-6 m-b-5">
-                                <a href="" class="w-100 float-right btn btn-success btn-sm" >
-                                    120 دنبال شونده
+                                <a href="" class="w-100 float-right btn btn-success btn-sm"  id="following">
+
                                 </a>
                             </div>
                             <div class="col-6 m-b-5">
-                                <a href="" class="w-100 float-left btn btn-success btn-sm" >
-                                    120 دنبال کننده
+                                <a href="" class="w-100 float-left btn btn-success btn-sm" id="follower">
+
                                 </a>
                             </div>
 
                             <div class="col-6">
-                                <a href="" class="w-100 float-left btn btn-success btn-sm" >
-                                    20 پست
+                                <a href="" class="w-100 float-left btn btn-success btn-sm" id="posts_count">
                                 </a>
                             </div>
                         </div>
@@ -48,93 +47,21 @@
                     <hr class="m-0" >
                     <div class="card-body">
                         <ul class="m-0 f-s-15" >
+                            <li><a class=" m-b-10 d-block" href="" id="home">خانه</a></li>
                             <li><a class=" m-b-10 d-block" href="">جستجو</a></li>
                             <li><a class=" m-b-10 d-block" href="">تغییر کلمه عبور</a></li>
-                            <li><a class="" href="">خروج</a></li>
+                            <li><a class="" href="" id="logout">خروج</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
             <div class="col-6">
                 <div class="card m-b-15" >
-                    <div class="card-body">
-                        <div class="form-group">
-                            <textarea id="context" class="form-control" rows="2" maxlength="100"></textarea>
-                        </div>
-                        <div class="clearfix" >
-                            <div class="float-right" >
-                                <span class="text-muted f-s-12 m-t-5 d-block" >100 کاراکتر</span>
-                            </div>
-                            <div class="float-left" >
-                                <button  id="sendBTN"   class="btn btn-outline-secondary btn-sm" >ارسال</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                <div class="card" >
-                    <div class="card-body">
-                        <div idclass="tweet" id="post">
-                            <div class="clearfix" >
-                                <a href="" class="name float-right">
-                                    <span class="name">پوریا صادقی</span>
-                                    <span class="username">@pooria</span>
-                                </a>
-                                <time class="float-left" >5 دقیقه پیش</time>
-                            </div>
-                            <p class="text">
-                                سلام بر شما ای دوست من ای کسی که
-                                <a href="">#ایران</a>
-                                را آباد کردی
-                            </p>
-                            <ul class="clearfix m-0 p-0" >
-                                <li class="float-left d-block m-r-15" >
-                                    <a href="">
-                                        <span >10</span>
-                                        <i class="fa fa-comments" ></i>
-                                    </a>
-                                </li>
-                                <li class="float-left d-block" >
-                                    <a href="">
-                                        <span id="likeCount"></span>
-                                        <i id = "likeBTN" class="fa fa-heart" ></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <hr class="m-0" >
-                    <div class="card-body">
-                        <div class="tweet">
-                            <div class="clearfix" >
-                                <a href="" class="name float-right">
-                                    <span class="name">پوریا صادقی</span>
-                                    <span class="username">@pooria</span>
-                                </a>
-                                <time class="float-left" >5 دقیقه پیش</time>
-                            </div>
-                            <p class="text">
-                                سلام بر شما ای دوست من ای کسی که
-                                <a href="">#ایران</a>
-                                را آباد کردی
-                            </p>
-                            <ul class="clearfix m-0 p-0" >
-                                <li class="float-left d-block m-r-15" >
-                                    <a href="">
-                                        <span>10</span>
-                                        <i id="comment" class="fa fa-comments" ></i>
-                                    </a>
-                                </li>
-                                <li class="float-left d-block" >
-                                    <a href="">
-                                        <span>10</span>
-                                        <i id="likeBTN" class="fa fa-heart" ></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="card"  id="card">
                 </div>
-                <a href="" class="btn btn-sm btn-outline-primary m-t-15 w-100">موارد بیشتر</a>
+                </div>
+
             </div>
         </div>
     </div>
@@ -146,104 +73,154 @@
 
 <script>
         window.onload = function () {
-            var sendBTN = document.getElementById("sendBTN");
-            sendBTN.onclick = function () {
-                var XML = new XMLHttpRequest();
-                XML.onreadystatechange = function () {
-                    if(this.readyState == 4 && this.status == 200 ){
-                        var result = JSON.parse(this.response);
-                        alert(result);
-                    }
-                };
-                XML.open("POST","/api/posts/create/",true);
-                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                var context = document.getElementById("context").value;
-                var user_id =  "1";
 
-
-                    var text = "context=" + context + "&user_id=" + user_id;
-                    XML.send(text);
-
+            var home = document.getElementById("home");
+            home.onclick = function (e) {
+                e.preventDefault();
+                window.location.replace("http://localhost:8000/users/"+5);
             };
 
 
-            var likeBTN = document.getElementById("likeBTN");
-            likeBTN.onclick = function () {
-                alert("okok")
+
+            var loginButton = document.getElementById("loginButton");
+            loginButton.onclick = function () {
+                  window.location.replace("http://localhost:8000/users/login/");
+            };
+
+            var logout = document.getElementById("logout");
+            logout.onclick = function (e) {
+                e.preventDefault();
                 var XML = new XMLHttpRequest();
                 XML.onreadystatechange = function () {
-                    if(this.readyState == 4 && this.status == 200 ){
-                        var result = JSON.parse(this.response);
-                        alert(result);
+                    if(this.readyState == 4 && this.status == 201 ){
+                        window.location.replace("http://localhost:8000/users/login/");
                     }
                 };
-                XML.open("POST","/api/posts/like/",true);
+                XML.open("POST","/api/users/logout/",true);
                 XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                var post_id = "1"
-                var user_id =  "1";
-                var  like = document.getElementById("likeCount");
-                    like.innerText=1;
-                    alert(like.innerText);
-                    var text = "post_id=" + post_id + "&user_id=" + user_id;
-                    XML.send(text);
+                XML.send();
             };
 
 
-            // edit
-            var comment = document.getElementById("comment");
-            comment.onclick = function () {
-                var XML = new XMLHttpRequest();
-                XML.onreadystatechange = function () {
-                    if(this.readyState == 4 && this.status == 200 ){
-                        var result = JSON.parse(this.response);
-                        alert(result);
-                    }
-                };
-                XML.open("POST","/api/",true);
-                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                var post_id = "1";
-                var user_id =  "1";
-                var  like = document.getElementById("likeCount");
-                    like.innerText=1;
-                    alert(like.innerText);
-                    var text = "post_id=" + post_id + "&user_id=" + user_id;
-                    XML.send(text);
-            };
+
+
+
+            {#// edit#}
+            {#var comment = document.getElementById("comment");#}
+            {#comment.onclick = function () {#}
+            {#    var XML = new XMLHttpRequest();#}
+            {#    XML.onreadystatechange = function () {#}
+            {#        if(this.readyState == 4 && this.status == 200 ){#}
+            {#            var result = JSON.parse(this.response);#}
+            {#            alert(result);#}
+            {#        }#}
+            {#    };#}
+            {#    XML.open("POST","/api/",true);#}
+            {#    XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");#}
+            {#    var post_id = "1";#}
+            {#    var user_id =  "1";#}
+            {#    var  like = document.getElementById("likeCount");#}
+            {#        like.innerText=1;#}
+            {#        alert(like.innerText);#}
+            {#        var text = "post_id=" + post_id + "&user_id=" + user_id;#}
+            {#        XML.send(text);#}
+            //};
+
+            var url = window.location.href.split("/");
 
             //edit posts
             var XML = new XMLHttpRequest();
-            var post;
             XML.onreadystatechange = function () {
                 if(XML.status == 200 && XML.readyState == 4){
-                    posts = JSON.parse(this.response);
-                    for(var post in posts) {
+                    result = JSON.parse(this.response);
+                    console.log(result);
+                    var username = result["user_info"]["username"];
+                    document.getElementById("username").innerText = username;
+                    var following_count = result["user_info"]["followings_count"];
+                    document.getElementById("following").innerText = following_count + " دنبال شونده ";
+                    var follower_count = result["user_info"]["followers_count"];
+                    document.getElementById("follower").innerText = follower_count + " دنبال کننده ";
+                    var posts_count = result["user_info"]["posts_count"];
+                    document.getElementById("posts_count").innerText = posts_count + " پست ";
+
+                    posts = result['user_info']['posts'];
+                    for(var i in posts) {
+                        post = posts[i];
+                        id = post["id"];
+                        element_maker("","div","card","card-body","card-body"+id);
+                        element_maker("","div","card-body"+id,"tweet","tweet"+id);
+                        element_maker("","div","tweet"+id,"clearfix","clearfix"+id);
+                        element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                        element_maker(username,"span","username"+id,"username","");
+                        var date = post["date"];
+                        element_maker(date,"time","clearfix"+id,"float-left","");
                         var context = post["context"];
-                        element_maker(context, "p", "post", "text");
-                        {#var id = post["id"];#}
-                        {#var user_id = post["user_id"];#}
-                        {#var date = post["date"];#}
+                        element_maker(context, "p", "tweet"+id,"text","");
+                        element_maker("","ul","tweet"+id,"clearfix m-0 p-0","commentUl"+id);
+                        element_maker("","li","commentUl"+id,"float-left d-block m-r-15","commentLi"+id);
+                        element_maker("","a","commentLi"+id,"","commentlink"+id,"");
+                        var comments_count = post["comments_count"];
+                        element_maker(" "+comments_count+" ","span","commentlink"+id,"","");
+                        element_maker("","i","commentlink"+id,"fa fa-comments","");
+                        element_maker("","li","commentUl"+id,"float-left d-block","likeLi"+id);
+                        var a = element_maker("","a","likeLi"+id,"","likelink"+id);
+                        a.post_id = id;
+                        a.onclick = likeFunction;
+                        var likes_count = post["likes_count"];
+                        element_maker(" "+likes_count+" ","span","likelink"+id,"","likeSpan"+id);
+                        element_maker("","i","likelink"+id,"fa fa-heart","");
+                        element_maker("","hr","card","m-0","");
                     }
 
                 }
             };
-            XML.open("GET","/api/users/last_posts_of_following_users/", true);
+            XML.open("GET","/api/users/user_page_info/?user_id="+url[url.length-3], true);
+            XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             XML.send();
-
-
-
         };
 
 
-       function element_maker(text ,type ,id,className) {
+       function element_maker(text ,type ,id_parent,className , id) {
                 var new_p = document.createElement(type);
+
+                if(type == "a"){
+                    new_p.href = "";
+                }
+                if(id != "") {
+                    new_p.id = id;
+                }
                 if(text != ""){
                     var textnode = document.createTextNode(text);
                     new_p.appendChild(textnode);
                 }
-                new_p.classList.add(className);
-                document.getElementById(id).appendChild(new_p);
+                if(className != "") {
+                    var classlistSplit = className.split(" ");
+                    for (var i in classlistSplit) {
+                        new_p.classList.add(classlistSplit[i]);
+                    }
+                }
+                document.getElementById(id_parent).appendChild(new_p);
                 return new_p;
        }
+
+         function  likeFunction(e) {
+                e.preventDefault();
+                var XML = new XMLHttpRequest();
+                id = this.post_id;
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 201){
+                        var result = JSON.parse(this.response);
+                        console.log(result);
+                        var likeSpan = document.getElementById("likeSpan"+id);
+                        likeSpan.innerText = " " + result["post_likes_count"] + " ";
+
+                    }
+                };
+                XML.open("POST","/api/posts/like/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var text = "post_id=" +id;
+                XML.send(text);
+            }
 
     </script>
 

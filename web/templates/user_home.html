@@ -20,8 +20,8 @@
             <div class="col-4">
                 <div class="card" >
                     <div class="card-body text-center">
-                        <a href="">
-                            <h5 class="card-title" id="username">پوریا صادقی</h5>
+                        <a href="" id="usernameLink">
+                            <h5 class="card-title" id="username"></h5>
                         </a>
                     </div>
                     <hr class="m-0" >
@@ -29,18 +29,15 @@
                         <div class="row row-4">
                             <div class="col-6 m-b-5">
                                 <a href="" class="w-100 float-right btn btn-success btn-sm"  id="following">
-                                    120 دنبال شونده
                                 </a>
                             </div>
                             <div class="col-6 m-b-5">
                                 <a href="" class="w-100 float-left btn btn-success btn-sm" id="follower">
-                                    120 دنبال کننده
                                 </a>
                             </div>
 
                             <div class="col-6">
                                 <a href="" class="w-100 float-left btn btn-success btn-sm" id="posts_count">
-                                    20 پست
                                 </a>
                             </div>
                         </div>
@@ -86,20 +83,23 @@
 
 <script>
         window.onload = function () {
+
+
+            var url = window.location.href.split("/");
             var sendBTN = document.getElementById("sendBTN");
             sendBTN.onclick = function () {
                 var XML = new XMLHttpRequest();
                 XML.onreadystatechange = function () {
-                    if(this.readyState == 4 && this.status == 200 ){
-                        var result = JSON.parse(this.response);
-                        alert(result);
+                    if(this.readyState == 4 && this.status == 201 ){
+                         result = JSON.parse(this.response);
+                         alert(result);
+                        window.location.replace("http://localhost:8000/users/"+url[url.length-2]+"/info/");
                     }
                 };
+                var context = document.getElementById("context").value;
                 XML.open("POST","/api/posts/create/",true);
                 XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                var context = document.getElementById("context").value;
-                var user_id =  "3";
-                var text = "context=" + context + "&user_id=" + user_id;
+                var text = "context=" + context ;
                 XML.send(text);
             };
 
@@ -122,26 +122,8 @@
                 XML.send();
             };
 
-            {#var likeBTN = document.getElementById("likeBTN");#}
-            {#likeBTN.onclick = function () {#}
-            {#    alert("okok")#}
-            {#    var XML = new XMLHttpRequest();#}
-            {#    XML.onreadystatechange = function () {#}
-            {#        if(this.readyState == 4 && this.status == 200 ){#}
-            {#            var result = JSON.parse(this.response);#}
-            {#            alert(result);#}
-            {#        }#}
-            {#    };#}
-            {#    XML.open("POST","/api/posts/like/",true);#}
-            {#    XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");#}
-            {#    var post_id = "1"#}
-            {#    var user_id =  "3";#}
-            {#    var  like = document.getElementById("likeCount");#}
-            {#        like.innerText=1;#}
-            {#        alert(like.innerText);#}
-            {#        var text = "post_id=" + post_id + "&user_id=" + user_id;#}
-            {#        XML.send(text);#}
-            //};
+
+
 
 
             {#// edit#}
@@ -173,6 +155,9 @@
                     result = JSON.parse(this.response);
                     {#alert(result);#}
                     console.log(result);
+                    var user_page_info = document.getElementById("usernameLink");
+                    user_page_info.onclick = get_user_page_info;
+                    user_page_info.user_id = result["user_home"]["user_id"];
                     var username = result["user_home"]["username"];
                     document.getElementById("username").innerText = username;
                     var following_count = result["user_home"]["followings_count"];
@@ -185,27 +170,32 @@
                     posts = result['user_home']['posts'];
                     for(var i in posts) {
                         post = posts[i];
-                        element_maker("","div","card","card-body","card-body"+i);
-                        element_maker("","div","card-body"+i,"tweet","tweet"+i);
-                        element_maker("","div","tweet"+i,"clearfix","clearfix"+i);
-                        element_maker("","a","clearfix"+i,"name float-right","username"+i);
+                        id = post["id"];
+                        element_maker("","div","card","card-body","card-body"+id);
+                        element_maker("","div","card-body"+id,"tweet","tweet"+id);
+                        element_maker("","div","tweet"+id,"clearfix","clearfix"+id);
+                        var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                        user_page.user_id = post["user_id"];
+                        user_page.onclick = get_user_page_info;
                         var user_username = post["user_username"];
-                        element_maker(user_username,"span","username"+i,"username","");
+                        element_maker(user_username,"span","username"+id,"username","");
                         var date = post["date"];
-                        element_maker(date,"time","clearfix"+i,"float-left","");
+                        element_maker(date,"time","clearfix"+id,"float-left","");
                         var context = post["context"];
-                        element_maker(context, "p", "tweet"+i,"text","");
-                        element_maker("","ul","tweet"+i,"clearfix m-0 p-0","commentUl"+i);
-                        element_maker("","li","commentUl"+i,"float-left d-block m-r-15","commentLi"+i);
-                        element_maker("","a","commentLi"+i,"","commentlink"+i,"");
+                        element_maker(context, "p", "tweet"+id,"text","");
+                        element_maker("","ul","tweet"+id,"clearfix m-0 p-0","commentUl"+id);
+                        element_maker("","li","commentUl"+id,"float-left d-block m-r-15","commentLi"+id);
+                        element_maker("","a","commentLi"+id,"","commentlink"+id,"");
                         var comments_count = post["comments_count"];
-                        element_maker(" "+comments_count+" ","span","commentlink"+i,"","");
-                        element_maker("","i","commentlink"+i,"fa fa-comments","");
-                        element_maker("","li","commentUl"+i,"float-left d-block","likeLi"+i);
-                        element_maker("","a","likeLi"+i,"","likelink"+i);
+                        element_maker(" "+comments_count+" ","span","commentlink"+id,"","");
+                        element_maker("","i","commentlink"+id,"fa fa-comments","");
+                        element_maker("","li","commentUl"+id,"float-left d-block","likeLi"+id);
+                        var a = element_maker("","a","likeLi"+id,"","likelink"+id);
+                        a.post_id = id;
+                        a.onclick = likeFunction;
                         var likes_count = post["likes_count"];
-                        element_maker(" "+likes_count+" ","span","likelink"+i,"","");
-                        element_maker("","i","likelink"+i,"fa fa-heart","");
+                        element_maker(" "+likes_count+" ","span","likelink"+id,"","likeSpan"+id);
+                        element_maker("","i","likelink"+id,"fa fa-heart","");
                         element_maker("","hr","card","m-0","");
                     }
 
@@ -216,6 +206,12 @@
             XML.send();
         };
 
+
+
+       function get_user_page_info(e) {
+           e.preventDefault();
+           window.location.replace("http://localhost:8000/users/"+this.user_id+"/info/");
+       }
 
        function element_maker(text ,type ,id_parent,className , id) {
                 var new_p = document.createElement(type);
@@ -239,6 +235,24 @@
                 document.getElementById(id_parent).appendChild(new_p);
                 return new_p;
        }
+
+         function  likeFunction(e) {
+                e.preventDefault();
+                var XML = new XMLHttpRequest();
+                id = this.post_id;
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 201){
+                        var result = JSON.parse(this.response);
+                        console.log(result);
+                        var likeSpan = document.getElementById("likeSpan"+id);
+                        likeSpan.innerText = " " + result["post_likes_count"] + " ";
+                    }
+                };
+                XML.open("POST","/api/posts/like/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var text = "post_id=" +id;
+                XML.send(text);
+            }
 
     </script>
 
