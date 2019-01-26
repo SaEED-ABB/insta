@@ -19,5 +19,6 @@ urlpatterns = [
     path('users/post_details/', views.get_post_details, name='get_post_details'),
     path('users/login/', views.login_user, name='login_user'),
     path('users/logout/', views.logout_user, name='logout_user'),
+    path('posts/hottest/', views.get_hottest_posts, name='get_hottest_posts'),
 
 ]
