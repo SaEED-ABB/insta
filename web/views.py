@@ -15,11 +15,13 @@ def register_user(request):
     return render(request, 'register.html')
 
 
-def create_post(request):
-    return render(request, 'user.html')
+def user_home(request, user_id):
+    return render(request, 'user_home.html')
 
-def user_detail(request):
-    return render(request, 'user_detail.html')
+
+def user_info(request, user_id):
+    return render(request, 'user_info.html')
+
 
 def login(request):
-    return render(request,'login.html')
+    return render(request, 'login.html')

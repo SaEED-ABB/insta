@@ -10,5 +10,5 @@ def get_last_posts_of_following_users(request):
     if not user_id:
         return JsonResponse({'error': "please login first"}, status=403)
 
-    posts = database.get_last_posts_of_following_users_query(user_id=user_id)
-    return JsonResponse({'posts': posts}, status=200)
+    result = database.get_last_posts_of_following_users_query(user_id=user_id)
+    return JsonResponse({'user_home': result}, status=200)

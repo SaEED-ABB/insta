@@ -64,8 +64,8 @@
             XML.onreadystatechange = function () {
                 if (XML.status == 201 && XML.readyState == 4) {
                     result = JSON.parse(this.response);
-                    alert(result["id"]);
-                    window.location.replace("http://localhost:8000/user/");
+                    {#alert(result["id"]);#}
+                    window.location.replace("http://localhost:8000/users/" + result['id'] + '/');
                 }
             };
 

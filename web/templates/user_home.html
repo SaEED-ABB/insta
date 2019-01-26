@@ -13,6 +13,7 @@
         <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
             Nstagram
         </p>
+        <button class="btn btn-outline-secondary btn-sm align-left" id="loginButton">ورود</button>
     </nav>
     <div class="container p-t-15 p-b-15">
         <div class="row justify-content-center">
@@ -20,26 +21,25 @@
                 <div class="card" >
                     <div class="card-body text-center">
                         <a href="">
-                            <h5 class="card-title">پوریا صادقی</h5>
-                            <span class="f-s-12">@pooria</span>
+                            <h5 class="card-title" id="username">پوریا صادقی</h5>
                         </a>
                     </div>
                     <hr class="m-0" >
                     <div class="card-body">
                         <div class="row row-4">
                             <div class="col-6 m-b-5">
-                                <a href="" class="w-100 float-right btn btn-success btn-sm" >
+                                <a href="" class="w-100 float-right btn btn-success btn-sm"  id="following">
                                     120 دنبال شونده
                                 </a>
                             </div>
                             <div class="col-6 m-b-5">
-                                <a href="" class="w-100 float-left btn btn-success btn-sm" >
+                                <a href="" class="w-100 float-left btn btn-success btn-sm" id="follower">
                                     120 دنبال کننده
                                 </a>
                             </div>
 
                             <div class="col-6">
-                                <a href="" class="w-100 float-left btn btn-success btn-sm" >
+                                <a href="" class="w-100 float-left btn btn-success btn-sm" id="posts_count">
                                     20 پست
                                 </a>
                             </div>
@@ -50,7 +50,7 @@
                         <ul class="m-0 f-s-15" >
                             <li><a class=" m-b-10 d-block" href="">جستجو</a></li>
                             <li><a class=" m-b-10 d-block" href="">تغییر کلمه عبور</a></li>
-                            <li><a class="" href="">خروج</a></li>
+                            <li><a class="" href="" id="logout">خروج</a></li>
                         </ul>
                     </div>
                 </div>
@@ -72,39 +72,9 @@
                     </div>
                 </div>
                 <div class="card"  id="card">
-                    <hr class="m-0" >
-                    <div class="card-body">
-                        <div class="tweet">
-                            <div class="clearfix" >
-                                <a href="" class="name float-right">
-                                    <span class="name">پوریا صادقی</span>
-                                    <span class="username">@pooria</span>
-                                </a>
-                                <time class="float-left" >5 دقیقه پیش</time>
-                            </div>
-                            <p class="text" >
-                                سلام بر شما ای دوست من ای کسی که
-                                <a href="">#ایران</a>
-                                را آباد کردی
-                            </p>
-                            <ul class="clearfix m-0 p-0" >
-                                <li class="float-left d-block m-r-15" >
-                                    <a href="">
-                                        <span>10</span>
-                                        <i  class="fa fa-comments" ></i>
-                                    </a>
-                                </li>
-                                <li class="float-left d-block" >
-                                    <a href="">
-                                        <span>10</span>
-                                        <i class="fa fa-heart" ></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
-                <a href="" class="btn btn-sm btn-outline-primary m-t-15 w-100">موارد بیشتر</a>
+                </div>
+
             </div>
         </div>
     </div>
@@ -133,6 +103,24 @@
                 XML.send(text);
             };
 
+            var loginButton = document.getElementById("loginButton");
+            loginButton.onclick = function () {
+                  window.location.replace("http://localhost:8000/users/login/");
+            };
+
+            var logout = document.getElementById("logout");
+            logout.onclick = function (e) {
+                e.preventDefault();
+                var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 201 ){
+                        window.location.replace("http://localhost:8000/users/login/");
+                    }
+                };
+                XML.open("POST","/api/users/logout/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                XML.send();
+            };
 
             {#var likeBTN = document.getElementById("likeBTN");#}
             {#likeBTN.onclick = function () {#}
@@ -180,10 +168,21 @@
             //edit posts
             var XML = new XMLHttpRequest();
             XML.onreadystatechange = function () {
-                {#alert("najme");#}
+
                 if(XML.status == 200 && XML.readyState == 4){
                     result = JSON.parse(this.response);
-                    posts = result['posts'];
+                    {#alert(result);#}
+                    console.log(result);
+                    var username = result["user_home"]["username"];
+                    document.getElementById("username").innerText = username;
+                    var following_count = result["user_home"]["followings_count"];
+                    document.getElementById("following").innerText = following_count + " دنبال شونده ";
+                    var follower_count = result["user_home"]["followers_count"];
+                    document.getElementById("follower").innerText = follower_count + " دنبال کننده ";
+                    var posts_count = result["user_home"]["posts_count"];
+                    document.getElementById("posts_count").innerText = posts_count + " پست ";
+
+                    posts = result['user_home']['posts'];
                     for(var i in posts) {
                         post = posts[i];
                         element_maker("","div","card","card-body","card-body"+i);
@@ -200,7 +199,6 @@
                         element_maker("","li","commentUl"+i,"float-left d-block m-r-15","commentLi"+i);
                         element_maker("","a","commentLi"+i,"","commentlink"+i,"");
                         var comments_count = post["comments_count"];
-                        alert(comments_count);
                         element_maker(" "+comments_count+" ","span","commentlink"+i,"","");
                         element_maker("","i","commentlink"+i,"fa fa-comments","");
                         element_maker("","li","commentUl"+i,"float-left d-block","likeLi"+i);
@@ -209,13 +207,11 @@
                         element_maker(" "+likes_count+" ","span","likelink"+i,"","");
                         element_maker("","i","likelink"+i,"fa fa-heart","");
                         element_maker("","hr","card","m-0","");
-                        var id = post["id"];
-                        {#var user_id = post["user_id"];#}
                     }
 
                 }
             };
-            XML.open("GET","/api/users/last_posts_of_following_users/?user_id=" + "5", true);
+            XML.open("GET","/api/users/last_posts_of_following_users/", true);
             XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             XML.send();
         };
