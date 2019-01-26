@@ -37,11 +37,7 @@
                                     120 دنبال کننده
                                 </a>
                             </div>
-                            <div class="col-6">
-                                <a href="" class="w-100 float-right btn btn-success btn-sm" >
-                                    100 لایک
-                                </a>
-                            </div>
+
                             <div class="col-6">
                                 <a href="" class="w-100 float-left btn btn-success btn-sm" >
                                     20 پست
@@ -75,37 +71,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card" >
-                    <div class="card-body">
-                        <div class="tweet">
-                            <div class="clearfix" >
-                                <a href="" class="name float-right">
-                                    <span class="name">پوریا صادقی</span>
-                                    <span class="username">@pooria</span>
-                                </a>
-                                <time class="float-left" >5 دقیقه پیش</time>
-                            </div>
-                            <p class="text">
-                                سلام بر شما ای دوست من ای کسی که
-                                <a href="">#ایران</a>
-                                را آباد کردی
-                            </p>
-                            <ul class="clearfix m-0 p-0" >
-                                <li class="float-left d-block m-r-15" >
-                                    <a href="">
-                                        <span >10</span>
-                                        <i class="fa fa-comments" ></i>
-                                    </a>
-                                </li>
-                                <li class="float-left d-block" >
-                                    <a href="">
-                                        <span id="likeCount"></span>
-                                        <i id = "likeBTN" class="fa fa-heart" ></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="card"  id="card">
                     <hr class="m-0" >
                     <div class="card-body">
                         <div class="tweet">
@@ -116,7 +82,7 @@
                                 </a>
                                 <time class="float-left" >5 دقیقه پیش</time>
                             </div>
-                            <p class="text">
+                            <p class="text" >
                                 سلام بر شما ای دوست من ای کسی که
                                 <a href="">#ایران</a>
                                 را آباد کردی
@@ -125,13 +91,13 @@
                                 <li class="float-left d-block m-r-15" >
                                     <a href="">
                                         <span>10</span>
-                                        <i id="comment" class="fa fa-comments" ></i>
+                                        <i  class="fa fa-comments" ></i>
                                     </a>
                                 </li>
                                 <li class="float-left d-block" >
                                     <a href="">
                                         <span>10</span>
-                                        <i id="likeBTN" class="fa fa-heart" ></i>
+                                        <i class="fa fa-heart" ></i>
                                     </a>
                                 </li>
                             </ul>
@@ -162,59 +128,122 @@
                 XML.open("POST","/api/posts/create/",true);
                 XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                 var context = document.getElementById("context").value;
-                var user_id =  "1";
-
-
-                    var text = "context=" + context + "&user_id=" + user_id;
-                    XML.send(text);
-
+                var user_id =  "3";
+                var text = "context=" + context + "&user_id=" + user_id;
+                XML.send(text);
             };
 
 
-            var likeBTN = document.getElementById("likeBTN");
-            likeBTN.onclick = function () {
-                alert("okok")
-                var XML = new XMLHttpRequest();
-                XML.onreadystatechange = function () {
-                    if(this.readyState == 4 && this.status == 200 ){
-                        var result = JSON.parse(this.response);
-                        alert(result);
+            {#var likeBTN = document.getElementById("likeBTN");#}
+            {#likeBTN.onclick = function () {#}
+            {#    alert("okok")#}
+            {#    var XML = new XMLHttpRequest();#}
+            {#    XML.onreadystatechange = function () {#}
+            {#        if(this.readyState == 4 && this.status == 200 ){#}
+            {#            var result = JSON.parse(this.response);#}
+            {#            alert(result);#}
+            {#        }#}
+            {#    };#}
+            {#    XML.open("POST","/api/posts/like/",true);#}
+            {#    XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");#}
+            {#    var post_id = "1"#}
+            {#    var user_id =  "3";#}
+            {#    var  like = document.getElementById("likeCount");#}
+            {#        like.innerText=1;#}
+            {#        alert(like.innerText);#}
+            {#        var text = "post_id=" + post_id + "&user_id=" + user_id;#}
+            {#        XML.send(text);#}
+            //};
+
+
+            {#// edit#}
+            {#var comment = document.getElementById("comment");#}
+            {#comment.onclick = function () {#}
+            {#    var XML = new XMLHttpRequest();#}
+            {#    XML.onreadystatechange = function () {#}
+            {#        if(this.readyState == 4 && this.status == 200 ){#}
+            {#            var result = JSON.parse(this.response);#}
+            {#            alert(result);#}
+            {#        }#}
+            {#    };#}
+            {#    XML.open("POST","/api/",true);#}
+            {#    XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");#}
+            {#    var post_id = "1";#}
+            {#    var user_id =  "1";#}
+            {#    var  like = document.getElementById("likeCount");#}
+            {#        like.innerText=1;#}
+            {#        alert(like.innerText);#}
+            {#        var text = "post_id=" + post_id + "&user_id=" + user_id;#}
+            {#        XML.send(text);#}
+            //};
+
+            //edit posts
+            var XML = new XMLHttpRequest();
+            XML.onreadystatechange = function () {
+                {#alert("najme");#}
+                if(XML.status == 200 && XML.readyState == 4){
+                    result = JSON.parse(this.response);
+                    posts = result['posts'];
+                    for(var i in posts) {
+                        post = posts[i];
+                        element_maker("","div","card","card-body","card-body"+i);
+                        element_maker("","div","card-body"+i,"tweet","tweet"+i);
+                        element_maker("","div","tweet"+i,"clearfix","clearfix"+i);
+                        element_maker("","a","clearfix"+i,"name float-right","username"+i);
+                        var user_username = post["user_username"];
+                        element_maker(user_username,"span","username"+i,"username","");
+                        var date = post["date"];
+                        element_maker(date,"time","clearfix"+i,"float-left","");
+                        var context = post["context"];
+                        element_maker(context, "p", "tweet"+i,"text","");
+                        element_maker("","ul","tweet"+i,"clearfix m-0 p-0","commentUl"+i);
+                        element_maker("","li","commentUl"+i,"float-left d-block m-r-15","commentLi"+i);
+                        element_maker("","a","commentLi"+i,"","commentlink"+i,"");
+                        var comments_count = post["comments_count"];
+                        alert(comments_count);
+                        element_maker(" "+comments_count+" ","span","commentlink"+i,"","");
+                        element_maker("","i","commentlink"+i,"fa fa-comments","");
+                        element_maker("","li","commentUl"+i,"float-left d-block","likeLi"+i);
+                        element_maker("","a","likeLi"+i,"","likelink"+i);
+                        var likes_count = post["likes_count"];
+                        element_maker(" "+likes_count+" ","span","likelink"+i,"","");
+                        element_maker("","i","likelink"+i,"fa fa-heart","");
+                        element_maker("","hr","card","m-0","");
+                        var id = post["id"];
+                        {#var user_id = post["user_id"];#}
                     }
-                };
-                XML.open("POST","/api/posts/like/",true);
-                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                var post_id = "1"
-                var user_id =  "1";
-                var  like = document.getElementById("likeCount");
-                    like.innerText=1;
-                    alert(like.innerText);
-                    var text = "post_id=" + post_id + "&user_id=" + user_id;
-                    XML.send(text);
+
+                }
             };
-
-
-            // edit
-            var comment = document.getElementById("comment");
-            comment.onclick = function () {
-                var XML = new XMLHttpRequest();
-                XML.onreadystatechange = function () {
-                    if(this.readyState == 4 && this.status == 200 ){
-                        var result = JSON.parse(this.response);
-                        alert(result);
-                    }
-                };
-                XML.open("POST","/api/",true);
-                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                var post_id = "1"
-                var user_id =  "1";
-                var  like = document.getElementById("likeCount");
-                    like.innerText=1;
-                    alert(like.innerText);
-                    var text = "post_id=" + post_id + "&user_id=" + user_id;
-                    XML.send(text);
-            };
-
+            XML.open("GET","/api/users/last_posts_of_following_users/?user_id=" + "5", true);
+            XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            XML.send();
         };
+
+
+       function element_maker(text ,type ,id_parent,className , id) {
+                var new_p = document.createElement(type);
+
+                if(type == "a"){
+                    new_p.href = "";
+                }
+                if(id != "") {
+                    new_p.id = id;
+                }
+                if(text != ""){
+                    var textnode = document.createTextNode(text);
+                    new_p.appendChild(textnode);
+                }
+                if(className != "") {
+                    var classlistSplit = className.split(" ");
+                    for (var i in classlistSplit) {
+                        new_p.classList.add(classlistSplit[i]);
+                    }
+                }
+                document.getElementById(id_parent).appendChild(new_p);
+                return new_p;
+       }
+
     </script>
 
 
