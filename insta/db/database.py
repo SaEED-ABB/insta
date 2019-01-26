@@ -277,3 +277,25 @@ def get_user_id_for_login_query(username, password):
     cursor.execute(query)
     id = cursor.fetchone()
     return id[0]
+
+
+def get_hottest_posts_query(order_by_date):
+    query = """SELECT * FROM 
+        (SELECT posts.id, posts.date, posts.context, posts.user_id, users.username, 
+            (SELECT COUNT(posts_likes.*) FROM posts_likes WHERE posts.id = posts_likes.post_id) AS likes_count, 
+            (SELECT COUNT(comments.*) FROM comments WHERE posts.id = comments.post_id) AS comments_count,
+            (SELECT COUNT(comments_likes.*) 
+                FROM comments_likes 
+                INNER JOIN comments ON comments_likes.comment_id = comments.id
+                WHERE posts.id = comments.post_id
+            ) AS comments_likes_count
+            FROM posts 
+            INNER JOIN users ON posts.user_id = users.id) AS posts_info
+        WHERE (likes_count + comments_count + comments_likes_count) > 0
+        ORDER BY (likes_count + comments_count + comments_likes_count) {} DESC;""".format(",date" if order_by_date else "")
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    posts = [dict(zip(('id', 'date', 'context', 'user_id', 'user_username', 'likes_count', 'comments_count', 'comments_likes_count'), row)) for row in rows]
+    return posts
