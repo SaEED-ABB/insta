@@ -3,15 +3,17 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <title>Nstagram</title>
+    <title>twitter</title>
     <link rel="stylesheet" href="{% static 'assets/css/plugin.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 </head>
 <body>
 <div class="page-panel">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-center">
+
         <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
-            Nstagram
+            twitter
+            <i class="fa fa-twitter" style="font-size:30px;color:white"></i>
         </p>
         <button class="btn btn-outline-secondary btn-sm align-left" id="loginButton">ورود</button>
     </nav>
@@ -114,6 +116,7 @@
                 var XML = new XMLHttpRequest();
                 XML.onreadystatechange = function () {
                     if(this.readyState == 4 && this.status == 201 ){
+                        alert(JSON.parse(this.response))
                         window.location.replace("http://localhost:8000/users/login/");
                     }
                 };
@@ -150,7 +153,6 @@
             //edit posts
             var XML = new XMLHttpRequest();
             XML.onreadystatechange = function () {
-
                 if(XML.status == 200 && XML.readyState == 4){
                     result = JSON.parse(this.response);
                     {#alert(result);#}
@@ -236,7 +238,7 @@
                 return new_p;
        }
 
-         function  likeFunction(e) {
+       function  likeFunction(e) {
                 e.preventDefault();
                 var XML = new XMLHttpRequest();
                 id = this.post_id;

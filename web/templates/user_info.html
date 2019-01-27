@@ -11,7 +11,7 @@
 <div class="page-panel">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-center">
         <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
-            Nstagram
+            twitter
         </p>
         <button class="btn btn-outline-secondary btn-sm align-left" id="loginButton">ورود</button>
     </nav>
@@ -34,12 +34,19 @@
                             </div>
                             <div class="col-6 m-b-5">
                                 <a href="" class="w-100 float-left btn btn-success btn-sm" id="follower">
-
                                 </a>
                             </div>
 
                             <div class="col-6">
                                 <a href="" class="w-100 float-left btn btn-success btn-sm" id="posts_count">
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="" class="w-100 float-left btn btn-success btn-sm" id="follow_unfollow">دنبال کردن
+                                </a>
+                            </div>
+                              <div class="col-6">
+                                <a href="" class="w-100 float-left btn btn-success btn-sm  align-self-center" id="block">بلاک کردن
                                 </a>
                             </div>
                         </div>
@@ -77,8 +84,19 @@
             var home = document.getElementById("home");
             home.onclick = function (e) {
                 e.preventDefault();
-                window.location.replace("http://localhost:8000/users/"+5);
+                var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 200 ){
+                        result = JSON.parse(this.response);
+                        console.log(result);
+                        window.location.replace("http://localhost:8000/users/"+result["id"]);
+                    }
+                };
+                XML.open("GET","/api/users/get_logged_in_id/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                XML.send();
             };
+
 
 
 
@@ -125,8 +143,50 @@
             {#        var text = "post_id=" + post_id + "&user_id=" + user_id;#}
             {#        XML.send(text);#}
             //};
-
             var url = window.location.href.split("/");
+            var follow_unfollow = document.getElementById("follow_unfollow");
+            follow_unfollow.onclick = function (e) {
+                e.preventDefault();
+              var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 201 ){
+                        console.log(JSON.parse(this.response));
+                        if(follow_unfollow.innerText == "دنبال کردن"){
+                            follow_unfollow.innerText = "لغو دنبال کردن";
+                        }else {
+                            follow_unfollow.innerText = "دنبال کردن";
+                        }
+                    }
+                };
+                XML.open("POST","/api/users/follow/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var text = "following_user_id="+url[url.length-3];
+                XML.send(text);
+            };
+
+            var block = document.getElementById("block");
+            block.onclick = function (e) {
+                e.preventDefault();
+                 var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 201 ){
+                        console.log(JSON.parse(this.response));
+                        if(block.innerText == "بلاک کردن"){
+                            block.innerText = "لغو بلاک کردن";
+                        }else {
+                            block.innerText = "بلاک کردن";
+                        }
+                    }
+                };
+                XML.open("POST","/api/users/block/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var text = "blocked_user_id="+url[url.length-3];
+                XML.send(text);
+
+            };
+
+
+
 
             //edit posts
             var XML = new XMLHttpRequest();

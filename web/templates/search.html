@@ -3,7 +3,7 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <title>Nstagram</title>
+    <title>twitter</title>
     <link rel="stylesheet" href="{% static 'assets/css/plugin.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 </head>
@@ -11,7 +11,7 @@
 <div class="page-panel">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-center">
         <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
-            Nstagram
+            twitter
         </p>
     </nav>
     <div class="container p-t-15 p-b-15">
@@ -65,10 +65,10 @@
                         <div class="form-group m-0">
                             <div class="row row-4">
                                 <div class="col">
-                                    <input type="text" class="form-control" placeholder="متن..." >
+                                    <input type="text" class="form-control" placeholder="متن..."  id="hash_tag">
                                 </div>
                                 <div class="col-2">
-                                    <button class="btn btn-outline-secondary w-100" type="button" >
+                                    <button class="btn btn-outline-secondary w-100" type="button" id="search" >
                                         <i class="fa fa-search" ></i>
                                     </button>
                                 </div>
@@ -80,47 +80,16 @@
                     <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs">
                             <li class="nav-item">
-                                <a class="nav-link active" href="#">پیام ها</a>
+                                <a class="nav-link active" href="#" id="tweets">پیام ها</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">کاربران</a>
+                                <a class="nav-link" href="#" id="users">کاربران</a>
                             </li>
                         </ul>
+
+                        <div class="card " style="margin-top: 10px" id="card"></div>
                     </div>
-                    <div class="card-body">
-                        <div class="tweet">
-                            <div class="clearfix" >
-                                <a href="" class="name float-right">
-                                    <span class="name">پوریا صادقی</span>
-                                    <span class="username">@pooria</span>
-                                </a>
-                                <time class="float-left" >5 دقیقه پیش</time>
-                            </div>
-                            <p class="text">
-                                سلام بر شما ای دوست من ای کسی که
-                                <a href="">#ایران</a>
-                                را آباد کردی
-                            </p>
-                            <ul class="clearfix m-0 p-0" >
-                                <li class="float-left d-block m-r-15" >
-                                    <a href="">
-                                        <span>10</span>
-                                        <i class="fa fa-comments" ></i>
-                                    </a>
-                                </li>
-                                <li class="float-left d-block" >
-                                    <a href="">
-                                        <span>10</span>
-                                        <i class="fa fa-heart" ></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <hr class="m-0" >
-                    <div class="card-body"></div>
                 </div>
-                <a href="" class="btn btn-sm btn-outline-primary m-t-15 w-100">موارد بیشتر</a>
             </div>
         </div>
     </div>
@@ -129,5 +98,165 @@
 <script type="text/javascript" src="{% static 'assets/js/lib/popper.js' %}" ></script>
 <script type="text/javascript" src="{% static 'assets/js/lib/bootstrap.js' %}" ></script>
 <script type="text/javascript" src="{% static 'assets/js/helper.js' %}" ></script>
+
+<script>
+    window.onload = function () {
+
+        document.getElementById("users").onclick = function (ev) {
+            ev.preventDefault();
+            this.classList.add("active");
+            var tweets = document.getElementById("tweets");
+            tweets.classList.remove("active");
+
+        };
+
+        document.getElementById("tweets").onclick = function (ev) {
+            ev.preventDefault();
+            this.classList.add("active");
+            var tweets = document.getElementById("users");
+            tweets.classList.remove("active");
+        };
+
+
+
+        var search = document.getElementById("search");
+        search.onclick = function () {
+            var tweets = document.getElementById("tweets");
+            if (tweets.classList.contains("active")) {
+                var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if (XML.status == 200 && XML.readyState == 4) {
+
+                        result = JSON.parse(this.response);
+                        {#alert(result);#}
+                        console.log(result);
+                        {#var user_page_info = document.getElementById("usernameLink");#}
+                        {#user_page_info.onclick = get_user_page_info;#}
+                        {#user_page_info.user_id = result["user_home"]["user_id"];#}
+                        {#var username = result["user_home"]["username"];#}
+                        {#document.getElementById("username").innerText = username;#}
+                        {#var following_count = result["user_home"]["followings_count"];#}
+                        {#document.getElementById("following").innerText = following_count + " دنبال شونده ";#}
+                        {#var follower_count = result["user_home"]["followers_count"];#}
+                        {#document.getElementById("follower").innerText = follower_count + " دنبال کننده ";#}
+                        {#var posts_count = result["user_home"]["posts_count"];#}
+                        {#document.getElementById("posts_count").innerText = posts_count + " پست ";#}
+                        var card = document.getElementById("card");
+                        while (card.firstChild) {
+                            card.removeChild(card.firstChild);
+                        }
+                        posts = result["posts"];
+                        for (var i in posts) {
+                            post = posts[i];
+                            console.log(post);
+                            id = post["id"];
+                            alert(id);
+                            element_maker("", "div", "card", "card-body", "card-body" + id);
+                            element_maker("", "div", "card-body" + id, "tweet", "tweet" + id);
+                            element_maker("", "div", "tweet" + id, "clearfix", "clearfix" + id);
+                            {#var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);#}
+                            {#user_page.user_id = post["user_id"];#}
+                            {#user_page.onclick = get_user_page_info;#}
+                            {#var user_username = post["user_username"];#}
+                            {#element_maker(user_username,"span","username"+id,"username","");#}
+                            var date = post["date"];
+                            element_maker(date, "time", "clearfix" + id, "float-left", "");
+                            var context = post["context"];
+                            element_maker(context, "p", "tweet" + id, "text", "");
+                            {#element_maker("","ul","tweet"+id,"clearfix m-0 p-0","commentUl"+id);#}
+                            {#element_maker("","li","commentUl"+id,"float-left d-block m-r-15","commentLi"+id);#}
+                            {#element_maker("","a","commentLi"+id,"","commentlink"+id,"");#}
+                            {#var comments_count = post["comments_count"];#}
+                            {#element_maker(" "+comments_count+" ","span","commentlink"+id,"","");#}
+                            {#element_maker("","i","commentlink"+id,"fa fa-comments","");#}
+                            {#element_maker("","li","commentUl"+id,"float-left d-block","likeLi"+id);#}
+                            {#var a = element_maker("","a","likeLi"+id,"","likelink"+id);#}
+                            {#a.post_id = id;#}
+                            {#a.onclick = likeFunction;#}
+                            {#var likes_count = post["likes_count"];#}
+                            {#element_maker(" "+likes_count+" ","span","likelink"+id,"","likeSpan"+id);#}
+                            {#element_maker("","i","likelink"+id,"fa fa-heart","");#}
+                            element_maker("", "hr", "card", "m-0", "");
+                        }
+
+                    }
+                };
+
+                var hashtag = document.getElementById("hash_tag").value;
+                XML.open("GET", "/api/posts/search_for_hash_tag/?hash_tag=" + hashtag, true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                XML.send();
+
+            }else{
+                var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if (XML.status == 200 && XML.readyState == 4) {
+                        result = JSON.parse(this.response);
+                        console.log(result);
+                        var card = document.getElementById("card");
+                        while (card.firstChild) {
+                            card.removeChild(card.firstChild);
+                        }
+                        users = result["users"];
+                        for (var i in users ) {
+                            user = users[i];
+                            id = user["id"];
+                            alert(id);
+                            element_maker("", "div", "card", "card-body", "card-body" + id);
+                            element_maker("", "div", "card-body" + id, "tweet", "tweet" + id);
+                            element_maker("", "div", "tweet" + id, "clearfix", "clearfix" + id);
+                            var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                            user_page.user_id = user["id"];
+                            user_page.onclick = get_user_page_info;
+                            var user_username = user["username"];
+                            element_maker(user_username,"span","username"+id,"username","");
+
+                        }
+
+                    }
+                };
+
+                var hashtag = document.getElementById("hash_tag").value;
+                XML.open("GET", "/api/users/search_username/?username=" + hashtag, true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                XML.send();
+
+            }
+
+        }
+
+    };
+
+    function get_user_page_info(e) {
+        e.preventDefault();
+        window.location.replace("http://localhost:8000/users/"+this.user_id+"/info/");
+    }
+
+
+    function element_maker(text ,type ,id_parent,className , id) {
+        var new_p = document.createElement(type);
+
+        if(type == "a"){
+            new_p.href = "";
+        }
+        if(id != "") {
+            new_p.id = id;
+        }
+        if(text != ""){
+            var textnode = document.createTextNode(text);
+            new_p.appendChild(textnode);
+        }
+        if(className != "") {
+            var classlistSplit = className.split(" ");
+            for (var i in classlistSplit) {
+                new_p.classList.add(classlistSplit[i]);
+            }
+        }
+        document.getElementById(id_parent).appendChild(new_p);
+        return new_p;
+    }
+
+
+</script>
 </body>
 </html>

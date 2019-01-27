@@ -25,3 +25,6 @@ def user_info(request, user_id):
 
 def login(request):
     return render(request, 'login.html')
+
+def search(request):
+    return render(request, 'search.html')

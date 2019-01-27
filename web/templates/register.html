@@ -3,14 +3,14 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <title>Nstagram</title>
+    <title>twitter</title>
     <link rel="stylesheet" href="{% static 'assets/css/plugin.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 </head>
 <body>
 <div class="page-register body_min_height">
     <div class="image">
-        <span>Nstagram</span>
+        <span>twitter</span>
     </div>
     <div class="form">
         <div class="row justify-content-center">
@@ -73,7 +73,7 @@
                         </form>
                     </div>
                     <div class="card-footer text-center">
-                        <a href="">قبلا ثبت نام کرده اید؟</a>
+                        <a href="" id="login">قبلا ثبت نام کرده اید؟</a>
                     </div>
                 </div>
             </div>
@@ -87,14 +87,32 @@
 
  <script>
         window.onload = function () {
-            {#alert("ok");#}
+
+            var login = document.getElementById("login");
+            login.onclick = function (ev) {
+                ev.preventDefault();
+                window.location.replace("http://localhost:8000/users/login/");
+            };
+
             var signUp_BTN = document.getElementById("signUp_BTN");
             signUp_BTN.onclick = function () {
                 var XML = new XMLHttpRequest();
                 XML.onreadystatechange = function () {
-                    if(this.readyState == 4 && this.status == 200 ){
+                    if(this.readyState == 4 && this.status == 201 ){
                         var result = JSON.parse(this.responseText);
                         alert(result);
+                        var XML2 = new XMLHttpRequest();
+                        XML2.onreadystatechange = function () {
+                            if (XML.status == 201 && XML.readyState == 4) {
+                                result = JSON.parse(this.response);
+                                window.location.replace("http://localhost:8000/users/" + result['id'] + '/');
+                            }
+                        };
+                        XML2.open("POST","/api/users/login/", true);
+                        XML2.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                        var text = "username=" + username + "&password=" + password;
+                        alert(text);
+                        XML2.send(text);
                     }
                 };
                 XML.open("POST","/api/users/create/",true);
