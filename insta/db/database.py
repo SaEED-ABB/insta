@@ -344,10 +344,12 @@ def get_post_details_query(post_id, user_id):
         INNER JOIN users ON comments.user_id = users.id
         WHERE comments.post_id = %s;""" % (user_id, post_id)
     else:
-        q3_post_comments = """SELECT comments.date, comments.user_id, comments.parent_id, users.username,
+        q3_post_comments = """SELECT comments.date, comments.user_id, comments.parent_id, users.username
         FROM comments 
         INNER JOIN users ON comments.user_id = users.id
         WHERE comments.post_id = %s;""" % post_id
+
+    q4_post_hash_tags = """SELECT id, hash_tag FROM hash_tags WHERE post_id = %s;""" % post_id
 
     cursor = get_database_connection()
     cursor.execute(q1_post_detail)
@@ -368,6 +370,11 @@ def get_post_details_query(post_id, user_id):
         comments = [dict(zip(('date', 'user_id', 'parent_id', 'user_username'), row)) for row in rows]
     result['post']['comments'] = comments
     result['post']['comments_count'] = len(comments)
+
+    cursor.execute(q4_post_hash_tags)
+    rows = cursor.fetchall()
+    hash_tags = [dict(zip(('id', 'hash_tag'), row)) for row in rows]
+    result['post']['hash_tags'] = hash_tags
 
     return result
 
@@ -417,32 +424,39 @@ def search_username_query(username):
 
 def search_posts_containing_hash_tag_query(hash_tag, logged_in_user_id):
 
-    q1 = """SELECT posts.*
-    FROM hash_tags
-    INNER JOIN posts ON (posts.id = hash_tags.post_id) AND 
+    q1 = """SELECT posts.id, posts.date, posts.context, posts.user_id, users.username,
+    (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id) AS likes_count, 
+    (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id) AS comments_count
+    FROM posts
+    INNER JOIN users ON posts.user_id = users.id
+    INNER JOIN hash_tags ON (posts.id = hash_tags.post_id) AND 
         (posts.user_id IN 
             (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s))
     WHERE hash_tags.hash_tag = '#%s';""" % (logged_in_user_id, hash_tag)
 
-    q2 = """SELECT posts.*
-    FROM hash_tags
-    INNER JOIN posts ON (posts.id = hash_tags.post_id) AND 
+    q2 = """SELECT posts.id, posts.date, posts.context, posts.user_id, users.username,
+    (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id) AS likes_count, 
+    (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id) AS comments_count
+    FROM posts
+    INNER JOIN users ON posts.user_id = users.id
+    INNER JOIN hash_tags ON (posts.id = hash_tags.post_id) AND 
         (posts.user_id NOT IN 
             (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s)) AND 
         (posts.hash_tags_count = 2)
     WHERE hash_tags.hash_tag = '#%s'
-    GROUP BY posts.id
     ORDER BY posts.date DESC;""" % (logged_in_user_id, hash_tag)
 
-    q3 = """SELECT posts.*
-    FROM hash_tags
-    INNER JOIN posts ON (posts.id = hash_tags.post_id) AND 
+    q3 = """SELECT posts.id, posts.date, posts.context, posts.user_id, users.username,
+    (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id) AS likes_count, 
+    (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id) AS comments_count
+    FROM posts
+    INNER JOIN users ON posts.user_id = users.id
+    INNER JOIN hash_tags ON (posts.id = hash_tags.post_id) AND
         (posts.user_id NOT IN 
             (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s)) AND 
         (posts.hash_tags_count > 2)
     WHERE hash_tags.hash_tag = '#%s'
-    GROUP BY posts.id
-    ORDER BY COUNT(posts.hash_tags_count) ASC;""" % (logged_in_user_id, hash_tag)
+    ORDER BY posts.hash_tags_count ASC;""" % (logged_in_user_id, hash_tag)
 
     cursor = get_database_connection()
     cursor.execute(q1)
@@ -451,7 +465,7 @@ def search_posts_containing_hash_tag_query(hash_tag, logged_in_user_id):
     rows += cursor.fetchall()
     cursor.execute(q3)
     rows += cursor.fetchall()
-    posts = [dict(zip(('id', 'date', 'context', 'user_id'), row)) for row in rows]
+    posts = [dict(zip(('id', 'date', 'context', 'user_id', 'user_username', 'likes_count', 'comments_count'), row)) for row in rows]
     return posts
 
 
