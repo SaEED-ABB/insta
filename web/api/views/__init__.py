@@ -16,3 +16,6 @@ from .login_user import login_user
 from .logout_user import logout_user
 from .get_hottest_posts import get_hottest_posts
 from .search_username import search_username
+from .search_posts_containing_hash_tag import search_posts_containing_hash_tag
+from .get_most_likely_fraudulent_users import get_most_likely_fraudulent_users
+from .get_logged_in_user_id import get_logged_in_user_id

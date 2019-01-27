@@ -11,6 +11,7 @@ def follow_user(request):
         return JsonResponse({'error': "please login first"}, status=403)
     following_user_id = request.POST['following_user_id']
 
-    followings_count = database.follow_user_query(user_id=user_id, following_user_id=following_user_id)
+    following_followers_count, follower_followings_count = database.follow_user_query(user_id=user_id, following_user_id=following_user_id)
 
-    return JsonResponse({'followings_count': followings_count}, status=201)
+    return JsonResponse({'following_followers_count': following_followers_count,
+                         'follower_followings_count': follower_followings_count}, status=201)

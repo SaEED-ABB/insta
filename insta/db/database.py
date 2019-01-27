@@ -47,15 +47,23 @@ def create_user_query(email, username, password, type, question_id, answer, bio)
     return id[0]
 
 
-def create_post_query(context, user_id):
-    columns = "(context, user_id)"
-    values = "('%s', %s)" % (context, user_id)
+def create_post_query(context, user_id, hash_tags_count):
+    columns = "(context, user_id, hash_tags_count)"
+    values = "('%s', %s, %s)" % (context, user_id, hash_tags_count)
     query = """INSERT INTO posts %s VALUES %s RETURNING id;""" % (columns, values)
 
     cursor = get_database_connection()
     cursor.execute(query)
     id = cursor.fetchone()
     return id[0]
+
+
+def has_comment_depth_more_than_one(parent_id):
+    query = """SELECT parent_id FROM comments WHERE id IN (SELECT parent_id FROM comments WHERE id = %s);""" % parent_id
+    cursor = get_database_connection()
+    cursor.execute(query)
+    grand_parent = cursor.fetchone()
+    return True if grand_parent else False
 
 
 def create_comment_query(context, parent_id, user_id, post_id):
@@ -91,6 +99,22 @@ def like_post_query(post_id, user_id):
     return post_likes_count[0]
 
 
+def is_he_liking_his_own_comment(comment_id, user_id):
+    query = """SELECT COUNT(*) FROM comments WHERE id = %s AND user_id = %s;""" % (comment_id, user_id)
+    cursor = get_database_connection()
+    cursor.execute(query)
+    row = cursor.fetchone()
+    return True if row[0] == 0 else False
+
+
+def is_he_liking_the_comment_of_his_blocker(comment_id, user_id):
+    query = """SELECT COUNT(*) FROM comments WHERE comments.id = %s AND comments.user_id IN
+        (SELECT blocks.user_id FROM blocks WHERE blocks.blocked_user_id = %s);""" % (comment_id, user_id)
+    cursor = get_database_connection()
+    cursor.execute(query)
+    row = cursor.fetchone()
+    return True if row[0] == 0 else False
+
 
 def like_comment_query(comment_id, user_id):
     cursor = get_database_connection()
@@ -121,11 +145,15 @@ def follow_user_query(user_id, following_user_id):
         q_do_unfollow = """DELETE FROM follows WHERE user_id = %s AND following_user_id = %s;""" % (user_id, following_user_id)
         cursor.execute(q_do_unfollow)
 
-    q_followings_count = """SELECT COUNT(*) FROM follows WHERE user_id = %s;""" % user_id
-    cursor.execute(q_followings_count)
-    followings_count = cursor.fetchone()
+    q_follower_followings_count = """SELECT COUNT(*) FROM follows WHERE user_id = %s;""" % user_id
+    cursor.execute(q_follower_followings_count)
+    follower_followings_count = cursor.fetchone()
 
-    return followings_count[0]
+    q_following_followers_count = """SELECT COUNT(*) FROM follows WHERE following_user_id = %s;""" % following_user_id
+    cursor.execute(q_following_followers_count)
+    following_followers_count = cursor.fetchone()
+
+    return following_followers_count[0], follower_followings_count[0]
 
 
 def block_user_query(user_id, blocked_user_id):
@@ -139,11 +167,15 @@ def block_user_query(user_id, blocked_user_id):
         q_do_unblock = """DELETE FROM blocks WHERE user_id = %s AND blocked_user_id = %s;""" % (user_id, blocked_user_id)
         cursor.execute(q_do_unblock)
 
-    q_blocked_count = """SELECT COUNT(*) FROM blocks WHERE user_id = %s;""" % user_id
-    cursor.execute(q_blocked_count)
-    blocked_count = cursor.fetchone()
+    q_blocker_blocked_count = """SELECT COUNT(*) FROM blocks WHERE user_id = %s;""" % user_id
+    cursor.execute(q_blocker_blocked_count)
+    blocker_blockeds_count = cursor.fetchone()
 
-    return blocked_count[0]
+    q_blocked_blockers_count = """SELECT COUNT(*) FROM blocks WHERE blocked_user_id = %s;""" % blocked_user_id
+    cursor.execute(q_blocked_blockers_count)
+    blocked_blockers_count = cursor.fetchone()
+
+    return blocked_blockers_count[0], blocker_blockeds_count[0]
 
 
 def create_hash_tag_query(hash_tag, post_id):
@@ -206,11 +238,12 @@ def get_last_posts_of_following_users_query(user_id):
 
     q1_posts = """SELECT posts.id, posts.date, posts.context, posts.user_id, users.username, 
     (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id), 
-    (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id)
+    (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id),
+    (SELECT COUNT(*) FROM posts_likes WHERE posts_likes.post_id = posts.id AND posts_likes.user_id = %s)
     FROM posts 
     INNER JOIN users ON posts.user_id = users.id
     WHERE posts.user_id IN (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s)
-    ORDER BY posts.date DESC LIMIT 100;""" % user_id
+    ORDER BY posts.date DESC LIMIT 100;""" % (user_id, user_id)
 
     q2_followings_count = """SELECT COUNT(*) FROM follows WHERE follows.user_id = %s;""" % user_id
 
@@ -221,7 +254,7 @@ def get_last_posts_of_following_users_query(user_id):
     cursor = get_database_connection()
     cursor.execute(q1_posts)
     rows = cursor.fetchall()
-    posts = [dict(zip(('id', 'date', 'context', 'user_id', 'user_username', 'likes_count', 'comments_count'), row)) for row in rows]
+    posts = [dict(zip(('id', 'date', 'context', 'user_id', 'user_username', 'likes_count', 'comments_count', 'has_current_user_liked'), row)) for row in rows]
     result['posts'] = posts
     result['posts_count'] = len(posts)
 
@@ -291,7 +324,7 @@ def get_user_page_info_query(user_id):
     return result
 
 
-def get_post_details_query(post_id):
+def get_post_details_query(post_id, user_id):
     result = {}
 
     q1_post_detail = """SELECT posts.*, users.username 
@@ -304,11 +337,17 @@ def get_post_details_query(post_id):
     INNER JOIN users ON posts_likes.user_id = users.id
     WHERE posts_likes.post_id = %s;""" % post_id
 
-    q3_post_comments = """SELECT comments.date, comments.user_id, comments.parent_id, users.username,
-    (SELECT COUNT(*) FROM comments_likes WHERE comments.id = comments_likes.comment_id) 
-    FROM comments 
-    INNER JOIN users ON comments.user_id = users.id
-    WHERE comments.post_id = %s;""" % post_id
+    if user_id:
+        q3_post_comments = """SELECT comments.date, comments.user_id, comments.parent_id, users.username,
+        (SELECT COUNT(*) FROM comments_likes WHERE comments_likes.comment_id = comments.id AND comments_likes.user_id = %s) 
+        FROM comments 
+        INNER JOIN users ON comments.user_id = users.id
+        WHERE comments.post_id = %s;""" % (user_id, post_id)
+    else:
+        q3_post_comments = """SELECT comments.date, comments.user_id, comments.parent_id, users.username,
+        FROM comments 
+        INNER JOIN users ON comments.user_id = users.id
+        WHERE comments.post_id = %s;""" % post_id
 
     cursor = get_database_connection()
     cursor.execute(q1_post_detail)
@@ -323,7 +362,10 @@ def get_post_details_query(post_id):
 
     cursor.execute(q3_post_comments)
     rows = cursor.fetchall()
-    comments = [dict(zip(('date', 'user_id', 'parent_id', 'user_username'), row)) for row in rows]
+    if user_id:
+        comments = [dict(zip(('date', 'user_id', 'parent_id', 'user_username', 'has_current_user_liked'), row)) for row in rows]
+    else:
+        comments = [dict(zip(('date', 'user_id', 'parent_id', 'user_username'), row)) for row in rows]
     result['post']['comments'] = comments
     result['post']['comments_count'] = len(comments)
 
@@ -365,6 +407,59 @@ def search_username_query(username):
     pattern = '%'.join(username.strip().split())
     pattern = '%{}%'.format(pattern)
     query = """SELECT * FROM users WHERE (users.username ILIKE '{}') OR ('{}' LIKE '%' || users.username || '%');""".format(pattern, username)
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
+    return users
+
+
+def search_posts_containing_hash_tag_query(hash_tag, logged_in_user_id):
+
+    q1 = """SELECT posts.*
+    FROM hash_tags
+    INNER JOIN posts ON (posts.id = hash_tags.post_id) AND 
+        (posts.user_id IN 
+            (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s))
+    WHERE hash_tags.hash_tag = '#%s';""" % (logged_in_user_id, hash_tag)
+
+    q2 = """SELECT posts.*
+    FROM hash_tags
+    INNER JOIN posts ON (posts.id = hash_tags.post_id) AND 
+        (posts.user_id NOT IN 
+            (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s)) AND 
+        (posts.hash_tags_count = 2)
+    WHERE hash_tags.hash_tag = '#%s'
+    GROUP BY posts.id
+    ORDER BY posts.date DESC;""" % (logged_in_user_id, hash_tag)
+
+    q3 = """SELECT posts.*
+    FROM hash_tags
+    INNER JOIN posts ON (posts.id = hash_tags.post_id) AND 
+        (posts.user_id NOT IN 
+            (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s)) AND 
+        (posts.hash_tags_count > 2)
+    WHERE hash_tags.hash_tag = '#%s'
+    GROUP BY posts.id
+    ORDER BY COUNT(posts.hash_tags_count) ASC;""" % (logged_in_user_id, hash_tag)
+
+    cursor = get_database_connection()
+    cursor.execute(q1)
+    rows = cursor.fetchall()
+    cursor.execute(q2)
+    rows += cursor.fetchall()
+    cursor.execute(q3)
+    rows += cursor.fetchall()
+    posts = [dict(zip(('id', 'date', 'context', 'user_id'), row)) for row in rows]
+    return posts
+
+
+def get_most_likely_fraudulent_users_query():
+    query = """SELECT * FROM users WHERE
+    ((CURRENT_TIMESTAMP - (SELECT date FROM posts WHERE users.id = posts.user_id ORDER BY date LIMIT 1)) * 10 <= 
+    (SELECT COUNT(*) FROM posts WHERE posts.user_id = users.id) * (INTERVAL '1 day')) AND 
+    (SELECT COUNT(*) FROM posts WHERE posts.id IN (SELECT posts_likes.post_id FROM posts_likes WHERE posts_likes.user_id = users.id) GROUP BY posts.user_id) > 1;"""
 
     cursor = get_database_connection()
     cursor.execute(query)

@@ -21,5 +21,8 @@ urlpatterns = [
     path('users/logout/', views.logout_user, name='logout_user'),
     path('posts/hottest/', views.get_hottest_posts, name='get_hottest_posts'),
     path('users/search_username/', views.search_username, name='search_username'),
+    path('posts/search_for_hash_tag/', views.search_posts_containing_hash_tag, name='search_posts_containing_hash_tag'),
+    path('users/most_likely_fraudulent/', views.get_most_likely_fraudulent_users, name='get_most_likely_fraudulent_users'),
+    path('users/get_logged_in_id/', views.get_logged_in_user_id, name='get_logged_in_user_id'),
 
 ]

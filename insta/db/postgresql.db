@@ -20,10 +20,11 @@ create table "users"(
 
 
 create table "posts"(
-    id          serial primary key,
-    date        timestamp not null default current_timestamp,
-    context     text not null,
-    user_id     int references users(id) not null,
+    id              serial primary key,
+    date            timestamp not null default current_timestamp,
+    context         text not null,
+    user_id         int references users(id) not null,
+    hash_tags_count int not null,
     unique (context, user_id)
 );
 
@@ -49,7 +50,7 @@ create table "posts_likes"(
 
 create table "comments_likes"(
     id          serial primary key,
-    comment_id  int references posts(id) not null,
+    comment_id  int references comments(id) not null,
     user_id     int references users(id) not null,
     unique (comment_id, user_id)
 );
