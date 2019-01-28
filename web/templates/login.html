@@ -42,7 +42,7 @@
                             </form>
                         </div>
                         <div class="card-footer text-center">
-                            <a href="">هنوز ثبت نام نکرده اید؟</a>
+                            <a href="" id="register">هنوز ثبت نام نکرده اید؟</a>
                         </div>
                     </div>
                 </div>
@@ -75,6 +75,12 @@
             var password = document.getElementById("password").value;
             var text = "username=" + username + "&password=" + password;
             XML.send(text);
+        }
+
+        var register = document.getElementById("register");
+        register.onclick = function (ev) {
+            ev.preventDefault();
+            window.location.replace("http://localhost:8000/users/register/");
         }
 
     };

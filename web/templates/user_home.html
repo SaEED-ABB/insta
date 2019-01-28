@@ -47,7 +47,7 @@
                     <hr class="m-0" >
                     <div class="card-body">
                         <ul class="m-0 f-s-15" >
-                            <li><a class=" m-b-10 d-block" href="">جستجو</a></li>
+                            <li><a class=" m-b-10 d-block" href="" id="search">جستجو</a></li>
                             <li><a class=" m-b-10 d-block" href="">تغییر کلمه عبور</a></li>
                             <li><a class="" href="" id="logout">خروج</a></li>
                         </ul>
@@ -58,7 +58,7 @@
                 <div class="card m-b-15" >
                     <div class="card-body">
                         <div class="form-group">
-                            <textarea id="context" class="form-control" rows="2" maxlength="100"></textarea>
+                            <textarea id="context" class="form-control" rows="2" maxlength="10000"></textarea>
                         </div>
                         <div class="clearfix" >
                             <div class="float-right" >
@@ -86,6 +86,12 @@
 <script>
         window.onload = function () {
 
+                var search = document.getElementById("search");
+            search.onclick = function (ev) {
+                ev.preventDefault();
+               window.location.replace("http://localhost:8000/users/search/");
+
+            };
 
             var url = window.location.href.split("/");
             var sendBTN = document.getElementById("sendBTN");
@@ -94,7 +100,6 @@
                 XML.onreadystatechange = function () {
                     if(this.readyState == 4 && this.status == 201 ){
                          result = JSON.parse(this.response);
-                         alert(result);
                         window.location.replace("http://localhost:8000/users/"+url[url.length-2]+"/info/");
                     }
                 };
@@ -155,7 +160,6 @@
             XML.onreadystatechange = function () {
                 if(XML.status == 200 && XML.readyState == 4){
                     result = JSON.parse(this.response);
-                    {#alert(result);#}
                     console.log(result);
                     var user_page_info = document.getElementById("usernameLink");
                     user_page_info.onclick = get_user_page_info;

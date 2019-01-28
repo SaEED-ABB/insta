@@ -3,7 +3,7 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <title>Nstagram</title>
+    <title>twitter</title>
     <link rel="stylesheet" href="{% static 'assets/css/plugin.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 </head>
@@ -11,7 +11,7 @@
 <div class="page-panel">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-center">
         <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
-            Nstagram
+            twitter
         </p>
     </nav>
     <div class="container p-t-15 p-b-15">
@@ -26,7 +26,9 @@
                     <hr class="m-0" >
                     <div class="card-body">
                         <ul class="m-0 f-s-15" >
-                            <li><a class="m-b-10 d-block" href="">کاربران</a></li>
+                            <li><a class="m-b-10 d-block" href="" id="get_hottest_posts">دیدن داغ ترین بیانات </a></li>
+                            <li><a class="m-b-10 d-block" href="" id="most_likely_fraudulent">مشاهده کاربران مشکوک به تقلب در لایک </a></li>
+                            <li><a class="m-b-10 d-block" href="" id="followed_back_all_their_followers">مشاهده کاربرانی که تمام دنبال کنندگانشان را دنبال کرده اند </a></li>
                             <li><a class="m-b-10 d-block" href="">توئیت ها</a></li>
                             <li><a class=" m-b-10 d-block" href="">تغییر کلمه عبور</a></li>
                             <li><a class="" href="">خروج</a></li>
@@ -35,50 +37,50 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card" >
-                    <div class="card-body">
-                        <table class="table table-bordered table-hover table-striped" >
-                            <thead>
-                            <tr>
-                                <th>ردیف</th>
-                                <th>نام</th>
-                                <th>ایمیل</th>
-                                <th>توئیت ها</th>
-                                <th>دنبال شونده ها</th>
-                                <th>دنبال کننده ها</th>
-                                <th>
-
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>
-                                    <a href="">@pooria</a>
-                                </td>
-                                <td>test@test.com</td>
-                                <td>
-                                    <a href="">10</a>
-                                </td>
-                                <td>
-                                    <a href="">20</a>
-                                </td>
-                                <td>
-                                    <a href="">40</a>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" >
-                                        Block
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-danger" >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="card" id="card" >
+{#                    <div class="card-body">#}
+{#                        <table class="table table-bordered table-hover table-striped" >#}
+{#                            <thead>#}
+{#                            <tr>#}
+{#                                <th>ردیف</th>#}
+{#                                <th>نام</th>#}
+{#                                <th>ایمیل</th>#}
+{#                                <th>توئیت ها</th>#}
+{#                                <th>دنبال شونده ها</th>#}
+{#                                <th>دنبال کننده ها</th>#}
+{#                                <th>#}
+{##}
+{#                                </th>#}
+{#                            </tr>#}
+{#                            </thead>#}
+{#                            <tbody>#}
+{#                            <tr>#}
+{#                                <td>1</td>#}
+{#                                <td>#}
+{#                                    <a href="">@pooria</a>#}
+{#                                </td>#}
+{#                                <td>test@test.com</td>#}
+{#                                <td>#}
+{#                                    <a href="">10</a>#}
+{#                                </td>#}
+{#                                <td>#}
+{#                                    <a href="">20</a>#}
+{#                                </td>#}
+{#                                <td>#}
+{#                                    <a href="">40</a>#}
+{#                                </td>#}
+{#                                <td>#}
+{#                                    <button type="button" class="btn btn-sm btn-outline-danger" >#}
+{#                                        Block#}
+{#                                    </button>#}
+{#                                    <button type="button" class="btn btn-sm btn-danger" >#}
+{#                                        Delete#}
+{#                                    </button>#}
+{#                                </td>#}
+{#                            </tr>#}
+{#                            </tbody>#}
+{#                        </table>#}
+{#                    </div>#}
                 </div>
             </div>
         </div>
@@ -88,5 +90,171 @@
 <script type="text/javascript" src="{% static 'assets/js/lib/popper.js' %}" ></script>
 <script type="text/javascript" src="{% static 'assets/js/lib/bootstrap.js' %}" ></script>
 <script type="text/javascript" src="{% static 'assets/js/helper.js' %}" ></script>
+<script>
+    window.onload = function () {
+
+        var get_hottest_posts = document.getElementById("get_hottest_posts");
+        get_hottest_posts.onclick = function (ev) {
+            ev.preventDefault();
+            var XML = new XMLHttpRequest();
+            XML.onreadystatechange = function () {
+                if(this.readyState == 4 && this.status == 200 ){
+                     result = JSON.parse(this.response);
+                     console.log(result["posts"]["id"]);
+                     var card = document.getElementById("card");
+                     while (card.firstChild) {
+                         card.removeChild(card.firstChild);
+                     }
+                     for(i in result["posts"]){
+                         post = result["posts"][i];
+                         id = post["id"];
+                        element_maker("","div","card","card-body","card-body"+id);
+                        element_maker("","div","card-body"+id,"tweet","tweet"+id);
+                        element_maker("","div","tweet"+id,"clearfix","clearfix"+id);
+                        var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                        user_page.user_id = post["user_id"];
+                        user_page.onclick = get_user_page_info;
+                        var user_username = post["user_username"];
+                        element_maker(user_username,"span","username"+id,"username","");
+                        var date = post["date"];
+                        element_maker(date,"time","clearfix"+id,"float-left","");
+                        var context = post["context"];
+                        element_maker(context, "p", "tweet"+id,"text","");
+                        element_maker("","ul","tweet"+id,"clearfix m-0 p-0","commentUl"+id);
+                        element_maker("","li","commentUl"+id,"float-left d-block m-r-15","commentLi"+id);
+                        element_maker("","a","commentLi"+id,"","commentlink"+id,"");
+                        var comments_count = post["comments_count"];
+                        element_maker(" "+comments_count+" ","span","commentlink"+id,"","");
+                        element_maker("","i","commentlink"+id,"fa fa-comments","");
+                        element_maker("","li","commentUl"+id,"float-left d-block","likeLi"+id);
+                        var a = element_maker("","a","likeLi"+id,"","likelink"+id);
+                        a.post_id = id;
+                        a.onclick = likeFunction;
+                        var likes_count = post["likes_count"];
+                        element_maker(" "+likes_count+" ","span","likelink"+id,"","likeSpan"+id);
+                        element_maker("","i","likelink"+id,"fa fa-heart","");
+                        element_maker("","hr","card","m-0","");
+                     }
+
+                }
+            };
+            XML.open("GET","/api/posts/hottest/",true);
+            XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            XML.send();
+        };
+
+        var most_likely_fraudulent = document.getElementById("most_likely_fraudulent");
+        most_likely_fraudulent.onclick =  function (ev) {
+            ev.preventDefault();
+            var XML = new XMLHttpRequest();
+            XML.onreadystatechange = function () {
+                if(this.readyState == 4 && this.status == 200){
+                    var result = JSON.parse(this.response);
+                    console.log(result);
+                    var card = document.getElementById("card");
+                     while (card.firstChild) {
+                         card.removeChild(card.firstChild);
+                     }
+                    users = result["users"];
+                    for (var i in users ) {
+                        user = users[i];
+                        id = user["id"];
+                        element_maker("", "div", "card", "card-body", "card-body" + id);
+                        element_maker("", "div", "card-body" + id, "tweet", "tweet" + id);
+                        element_maker("", "div", "tweet" + id, "clearfix", "clearfix" + id);
+                        var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                        user_page.user_id = user["id"];
+                        user_page.onclick = get_user_page_info;
+                        var user_username = user["username"];
+                        element_maker(user_username,"span","username"+id,"username","");
+
+                    }
+                }
+            };
+            XML.open("GET","/api/users/most_likely_fraudulent/",true);
+            XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            XML.send();
+        };
+
+        var followed_back_all_their_followers = document.getElementById("followed_back_all_their_followers");
+        followed_back_all_their_followers.onclick = function (ev) {
+            ev.preventDefault();
+            var XML = new XMLHttpRequest();
+            XML.onreadystatechange = function () {
+                if(this.readyState == 4 && this.status == 200){
+                    var result = JSON.parse(this.response);
+                    console.log(result);
+                    var card = document.getElementById("card");
+                     while (card.firstChild) {
+                         card.removeChild(card.firstChild);
+                     }
+                    users = result["users"];
+                    for (var i in users ) {
+                        user = users[i];
+                        id = user["id"];
+                        element_maker("", "div", "card", "card-body", "card-body" + id);
+                        element_maker("", "div", "card-body" + id, "tweet", "tweet" + id);
+                        element_maker("", "div", "tweet" + id, "clearfix", "clearfix" + id);
+                        var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                        user_page.user_id = user["id"];
+                        user_page.onclick = get_user_page_info;
+                        var user_username = user["username"];
+                        element_maker(user_username,"span","username"+id,"username","");
+
+                    }
+                }
+            };
+            XML.open("GET","/api/users/followed_back_all_their_followers/",true);
+            XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            XML.send();
+
+        }
+
+    };
+    function get_user_page_info(e) {
+        e.preventDefault();
+        window.location.replace("http://localhost:8000/users/"+this.user_id+"/info/");
+    }
+    function  likeFunction(e) {
+        e.preventDefault();
+        var XML = new XMLHttpRequest();
+        id = this.post_id;
+        XML.onreadystatechange = function () {
+            if(this.readyState == 4 && this.status == 201){
+                var result = JSON.parse(this.response);
+                console.log(result);
+                var likeSpan = document.getElementById("likeSpan"+id);
+                likeSpan.innerText = " " + result["post_likes_count"] + " ";
+            }
+        };
+        XML.open("POST","/api/posts/like/",true);
+        XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        var text = "post_id=" +id;
+        XML.send(text);
+    }
+    function element_maker(text ,type ,id_parent,className , id) {
+        var new_p = document.createElement(type);
+
+        if(type == "a"){
+            new_p.href = "";
+        }
+        if(id != "") {
+            new_p.id = id;
+        }
+        if(text != ""){
+            var textnode = document.createTextNode(text);
+            new_p.appendChild(textnode);
+        }
+        if(className != "") {
+            var classlistSplit = className.split(" ");
+            for (var i in classlistSplit) {
+                new_p.classList.add(classlistSplit[i]);
+            }
+        }
+        document.getElementById(id_parent).appendChild(new_p);
+        return new_p;
+    }
+
+</script>
 </body>
 </html>
