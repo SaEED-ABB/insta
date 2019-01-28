@@ -24,5 +24,8 @@ urlpatterns = [
     path('posts/search_for_hash_tag/', views.search_posts_containing_hash_tag, name='search_posts_containing_hash_tag'),
     path('users/most_likely_fraudulent/', views.get_most_likely_fraudulent_users, name='get_most_likely_fraudulent_users'),
     path('users/get_logged_in_id/', views.get_logged_in_user_id, name='get_logged_in_user_id'),
+    path('users/get_logged_in_question/', views.get_question_for_logged_in_user, name='get_question_for_logged_in_user'),
+    path('users/get_forgotten_password/', views.get_forgotten_user_password, name='get_forgotten_user_password'),
+    path('users/change_password/', views.change_user_password, name='change_user_password'),
 
 ]

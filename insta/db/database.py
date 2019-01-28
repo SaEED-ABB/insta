@@ -295,7 +295,7 @@ def get_user_page_info_query(user_id, logged_in_user_id):
     INNER JOIN users ON users.id = follows.user_id
     WHERE follows.following_user_id = %s;""" % user_id
 
-    q4_username = """SELECT username FROM users WHERE id = %s;""" % user_id
+    q4_username_and_bio = """SELECT username, bio FROM users WHERE id = %s;""" % user_id
 
     cursor = get_database_connection()
     cursor.execute(q1_posts)
@@ -316,9 +316,10 @@ def get_user_page_info_query(user_id, logged_in_user_id):
     result['followers'] = followers
     result['followers_count'] = len(followers)
 
-    cursor.execute(q4_username)
+    cursor.execute(q4_username_and_bio)
     row = cursor.fetchone()
     result['username'] = row[0]
+    result['bio'] = row[1]
     result['user_id'] = user_id
 
     if logged_in_user_id:
@@ -499,3 +500,49 @@ def get_users_commented_more_than_10_times_under_more_than_3_posts_query():
         WHERE 
     ORDER BY (SELECT COUNT(*) FROM comments WHERE comments.post_id = posts.id AND comments.user_id = users.user_id) DESC LIMIT 4)
     ;"""
+
+
+def get_question_for_logged_in_user_query(user_id):
+    query = """SELECT questions.context
+    FROM users 
+    INNER JOIN questions ON questions.id = users.question_id
+    WHERE users.id = %s;""" % user_id
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    question_context = cursor.fetchone()
+    return question_context[0]
+
+
+def is_his_answer_correct_query(user_id, answer):
+    query = """SELECT COUNT(*) FROM users WHERE id = %s AND answer = '%s';""" % (user_id, answer)
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    is_his_answer_correct = cursor.fetchone()
+    return True if is_his_answer_correct[0] == 1 else False
+
+
+def get_forgotten_user_password_query(user_id):
+    query = """SELECT password FROM users WHERE id = %s;""" % user_id
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    password = cursor.fetchone()
+    return password[0]
+
+
+def does_his_old_password_match_query(user_id, old_password):
+    query = """SELECT COUNT(*) FROM users WHERE id = %s AND password = '%s';""" % (user_id, old_password)
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    does_his_old_password_match = cursor.fetchone()
+    return True if does_his_old_password_match[0] == 1 else False
+
+
+def change_user_password_query(user_id, new_password):
+    query = """UPDATE users SET password = '%s' WHERE id = %s;""" % (new_password, user_id)
+
+    cursor = get_database_connection()
+    cursor.execute(query)

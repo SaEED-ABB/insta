@@ -19,3 +19,6 @@ from .search_username import search_username
 from .search_posts_containing_hash_tag import search_posts_containing_hash_tag
 from .get_most_likely_fraudulent_users import get_most_likely_fraudulent_users
 from .get_logged_in_user_id import get_logged_in_user_id
+from .get_question_for_logged_in_user import get_question_for_logged_in_user
+from .get_forgotten_user_password import get_forgotten_user_password
+from .change_user_password import change_user_password
