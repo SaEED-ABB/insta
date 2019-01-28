@@ -274,7 +274,7 @@ def get_last_posts_of_following_users_query(user_id):
     return result
 
 
-def get_user_page_info_query(user_id):
+def get_user_page_info_query(user_id, logged_in_user_id):
     result = {}
 
     q1_posts = """SELECT posts.id, posts.date, posts.context, 
@@ -320,6 +320,16 @@ def get_user_page_info_query(user_id):
     row = cursor.fetchone()
     result['username'] = row[0]
     result['user_id'] = user_id
+
+    if logged_in_user_id:
+        q5_you_followed_him = """SELECT COUNT(*) FROM follows WHERE user_id = %s AND following_user_id = %s;""" % (logged_in_user_id, user_id)
+        q6_you_blocked_him = """SELECT COUNT(*) FROM blocks WHERE user_id = %s AND blocked_user_id = %s;""" % (logged_in_user_id, user_id)
+        cursor.execute(q5_you_followed_him)
+        you_followed_him = cursor.fetchone()
+        result['you_followed_him'] = you_followed_him[0]
+        cursor.execute(q6_you_blocked_him)
+        you_blocked_him = cursor.fetchone()
+        result['you_blocked_him'] = you_blocked_him[0]
 
     return result
 
@@ -480,3 +490,12 @@ def get_most_likely_fraudulent_users_query():
     rows = cursor.fetchall()
     users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
     return users
+
+
+def get_users_commented_more_than_10_times_under_more_than_3_posts_query():
+    query = """SELECT users.id, users.username 
+        FROM users
+        INNER JOIN posts ON (users.id IN (SELECT comments.user_id FROM comments WHERE comments.post_id = posts.id))
+        WHERE 
+    ORDER BY (SELECT COUNT(*) FROM comments WHERE comments.post_id = posts.id AND comments.user_id = users.user_id) DESC LIMIT 4)
+    ;"""
