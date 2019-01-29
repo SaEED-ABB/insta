@@ -363,13 +363,13 @@ def get_post_details_query(post_id, user_id):
     WHERE posts_likes.post_id = %s;""" % post_id
 
     if user_id:
-        q3_post_comments = """SELECT comments.id, comments.date, comments.user_id, comments.parent_id, users.username,
+        q3_post_comments = """SELECT comments.id, comments.date, comments.context, comments.post_id, comments.user_id, comments.parent_id, users.username,
         (SELECT COUNT(*) FROM comments_likes WHERE comments_likes.comment_id = comments.id AND comments_likes.user_id = %s) 
         FROM comments 
         INNER JOIN users ON comments.user_id = users.id
         WHERE comments.post_id = %s;""" % (user_id, post_id)
     else:
-        q3_post_comments = """SELECT comments.id, comments.date, comments.user_id, comments.parent_id, users.username
+        q3_post_comments = """SELECT comments.id, comments.date, comments.context, comments.post_id, comments.user_id, comments.parent_id, users.username
         FROM comments 
         INNER JOIN users ON comments.user_id = users.id
         WHERE comments.post_id = %s;""" % post_id
@@ -388,9 +388,9 @@ def get_post_details_query(post_id, user_id):
     cursor.execute(q3_post_comments)
     rows = cursor.fetchall()
     if user_id:
-        comments = [dict(zip(('id', 'date', 'user_id', 'parent_id', 'user_username', 'has_current_user_liked'), row)) for row in rows]
+        comments = [dict(zip(('id', 'date', 'context', 'post_id', 'user_id', 'parent_id', 'user_username', 'has_current_user_liked'), row)) for row in rows]
     else:
-        comments = [dict(zip(('id', 'date', 'user_id', 'parent_id', 'user_username'), row)) for row in rows]
+        comments = [dict(zip(('id', 'date', 'context', 'post_id', 'user_id', 'parent_id', 'user_username'), row)) for row in rows]
 
     for i, _ in enumerate(comments):
         if comments[i]['parent_id'] is None:
@@ -453,7 +453,13 @@ def search_username_query(username):
     return users
 
 
-def search_posts_containing_hash_tag_query(hash_tag, logged_in_user_id):
+def search_posts_containing_hash_tag_query(hash_tag, hash_tag_id, logged_in_user_id):
+    if hash_tag:
+        condition = "hash_tags.hash_tag = '#%s'" % hash_tag
+    elif hash_tag_id:
+        condition = "hash_tags.id = %s" % hash_tag_id
+    else:
+        return
 
     q1 = """SELECT posts.id, posts.date, posts.context, posts.user_id, users.username,
     (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id) AS likes_count, 
@@ -463,7 +469,7 @@ def search_posts_containing_hash_tag_query(hash_tag, logged_in_user_id):
     INNER JOIN hash_tags ON (posts.id = hash_tags.post_id) AND 
         (posts.user_id IN 
             (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s))
-    WHERE hash_tags.hash_tag = '#%s';""" % (logged_in_user_id, hash_tag)
+    WHERE %s;""" % (logged_in_user_id, condition)
 
     q2 = """SELECT posts.id, posts.date, posts.context, posts.user_id, users.username,
     (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id) AS likes_count, 
@@ -474,8 +480,8 @@ def search_posts_containing_hash_tag_query(hash_tag, logged_in_user_id):
         (posts.user_id NOT IN 
             (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s)) AND 
         (posts.hash_tags_count = 2)
-    WHERE hash_tags.hash_tag = '#%s'
-    ORDER BY posts.date DESC;""" % (logged_in_user_id, hash_tag)
+    WHERE %s
+    ORDER BY posts.date DESC;""" % (logged_in_user_id, condition)
 
     q3 = """SELECT posts.id, posts.date, posts.context, posts.user_id, users.username,
     (SELECT COUNT(*) FROM posts_likes WHERE posts.id = posts_likes.post_id) AS likes_count, 
@@ -486,8 +492,8 @@ def search_posts_containing_hash_tag_query(hash_tag, logged_in_user_id):
         (posts.user_id NOT IN 
             (SELECT follows.following_user_id FROM follows WHERE follows.user_id = %s)) AND 
         (posts.hash_tags_count > 2)
-    WHERE hash_tags.hash_tag = '#%s'
-    ORDER BY posts.hash_tags_count ASC;""" % (logged_in_user_id, hash_tag)
+    WHERE %s
+    ORDER BY posts.hash_tags_count ASC;""" % (logged_in_user_id, condition)
 
     cursor = get_database_connection()
     cursor.execute(q1)
