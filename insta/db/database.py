@@ -255,6 +255,8 @@ def get_last_posts_of_following_users_query(user_id):
     cursor.execute(q1_posts)
     rows = cursor.fetchall()
     posts = [dict(zip(('id', 'date', 'context', 'user_id', 'user_username', 'likes_count', 'comments_count', 'has_current_user_liked'), row)) for row in rows]
+    for i in range(len(posts)):
+        posts[i]['hash_tags'] = get_post_hash_tags_query(post_id=posts[i]['id'])
     result['posts'] = posts
     result['posts_count'] = len(posts)
 
@@ -285,15 +287,19 @@ def get_user_page_info_query(user_id, logged_in_user_id):
         WHERE posts.user_id = %s
         ORDER BY posts.date DESC;""" % user_id
 
-    q2_followings = """SELECT follows.following_user_id, users.username 
+    q2_followings = """SELECT follows.following_user_id, users.username,
+        (SELECT COUNT(*) FROM follows WHERE user_id = %s AND following_user_id = users.id) AS you_followed_him,
+        (SELECT COUNT(*) FROM blocks WHERE user_id = %s AND blocked_user_id = users.id) AS you_blocked_him
         FROM follows 
         INNER JOIN users ON users.id = follows.following_user_id
-        WHERE follows.user_id = %s;""" % user_id
+        WHERE follows.user_id = %s;""" % (logged_in_user_id, logged_in_user_id, user_id)
 
-    q3_followers = """SELECT follows.user_id, users.username 
-    FROM follows 
-    INNER JOIN users ON users.id = follows.user_id
-    WHERE follows.following_user_id = %s;""" % user_id
+    q3_followers = """SELECT follows.user_id, users.username,
+        (SELECT COUNT(*) FROM follows WHERE user_id = %s AND following_user_id = users.id) AS you_followed_him,
+        (SELECT COUNT(*) FROM blocks WHERE user_id = %s AND blocked_user_id = users.id) AS you_blocked_him
+        FROM follows 
+        INNER JOIN users ON users.id = follows.user_id
+        WHERE follows.following_user_id = %s;""" % (logged_in_user_id, logged_in_user_id, user_id)
 
     q4_username_and_bio = """SELECT username, bio FROM users WHERE id = %s;""" % user_id
 
@@ -301,18 +307,20 @@ def get_user_page_info_query(user_id, logged_in_user_id):
     cursor.execute(q1_posts)
     rows = cursor.fetchall()
     posts = [dict(zip(('id', 'date', 'context', 'likes_count', 'comments_count'), row)) for row in rows]
+    for i in range(len(posts)):
+        posts[i]['hash_tags'] = get_post_hash_tags_query(post_id=posts[i]['id'])
     result['posts'] = posts
     result['posts_count'] = len(posts)
 
     cursor.execute(q2_followings)
     rows = cursor.fetchall()
-    followings = [dict(zip(('id', 'username'), row)) for row in rows]
+    followings = [dict(zip(('id', 'username', 'you_followed_him', 'you_blocked_him'), row)) for row in rows]
     result['followings'] = followings
     result['followings_count'] = len(followings)
 
     cursor.execute(q3_followers)
     rows = cursor.fetchall()
-    followers = [dict(zip(('id', 'username'), row)) for row in rows]
+    followers = [dict(zip(('id', 'username', 'you_followed_him', 'you_blocked_him'), row)) for row in rows]
     result['followers'] = followers
     result['followers_count'] = len(followers)
 
@@ -333,6 +341,15 @@ def get_user_page_info_query(user_id, logged_in_user_id):
         result['you_blocked_him'] = you_blocked_him[0]
 
     return result
+
+
+def get_post_hash_tags_query(post_id):
+    q4_post_hash_tags = """SELECT id, hash_tag FROM hash_tags WHERE post_id = %s;""" % post_id
+    cursor = get_database_connection()
+    cursor.execute(q4_post_hash_tags)
+    rows = cursor.fetchall()
+    hash_tags = [dict(zip(('id', 'hash_tag'), row)) for row in rows]
+    return hash_tags
 
 
 def get_post_details_query(post_id, user_id):
@@ -360,8 +377,6 @@ def get_post_details_query(post_id, user_id):
         INNER JOIN users ON comments.user_id = users.id
         WHERE comments.post_id = %s;""" % post_id
 
-    q4_post_hash_tags = """SELECT id, hash_tag FROM hash_tags WHERE post_id = %s;""" % post_id
-
     cursor = get_database_connection()
     cursor.execute(q1_post_detail)
     row = cursor.fetchone()
@@ -382,10 +397,7 @@ def get_post_details_query(post_id, user_id):
     result['post']['comments'] = comments
     result['post']['comments_count'] = len(comments)
 
-    cursor.execute(q4_post_hash_tags)
-    rows = cursor.fetchall()
-    hash_tags = [dict(zip(('id', 'hash_tag'), row)) for row in rows]
-    result['post']['hash_tags'] = hash_tags
+    result['post']['hash_tags'] = get_post_hash_tags_query(post_id=post_id)
 
     return result
 
