@@ -199,10 +199,7 @@ def get_user_type_query(user_id):
 
 
 def get_users_followed_back_all_their_followers_query():
-    # query = """WITH followers AS (SELECT user_id FROM follows WHERE following_user_id = users.id),
-    # followings AS (SELECT following_user_id FROM follows WHERE user_id = users.id)
-    # SELECT * FROM users WHERE (followers) IN (followings);"""
-    query = """SELECT * FROM users WHERE 
+    query = """SELECT users.id, users.username FROM users WHERE 
     (SELECT user_id FROM follows WHERE following_user_id = users.id) 
     IN 
     (SELECT following_user_id FROM follows WHERE user_id = users.id);"""
@@ -210,12 +207,12 @@ def get_users_followed_back_all_their_followers_query():
     cursor = get_database_connection()
     cursor.execute(query)
     rows = cursor.fetchall()
-    users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
+    users = [dict(zip(('id', 'username'), row)) for row in rows]
     return users
 
 
 def get_users_whose_following_users_are_active_query():
-    query = """SELECT * FROM users WHERE 
+    query = """SELECT users.id, users.username FROM users WHERE 
     users.id 
     IN 
     (SELECT following_user_id FROM follows WHERE 
@@ -229,7 +226,7 @@ def get_users_whose_following_users_are_active_query():
     cursor = get_database_connection()
     cursor.execute(query)
     rows = cursor.fetchall()
-    users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
+    users = [dict(zip(('id', 'username'), row)) for row in rows]
     return users
 
 
@@ -447,12 +444,12 @@ def get_hottest_posts_query(order_by_date):
 def search_username_query(username):
     pattern = '%'.join(username.strip().split())
     pattern = '%{}%'.format(pattern)
-    query = """SELECT * FROM users WHERE (users.username ILIKE '{}') OR ('{}' LIKE '%' || users.username || '%');""".format(pattern, username)
+    query = """SELECT users.id, users.username FROM users WHERE (users.username ILIKE '{}') OR ('{}' LIKE '%' || users.username || '%');""".format(pattern, username)
 
     cursor = get_database_connection()
     cursor.execute(query)
     rows = cursor.fetchall()
-    users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
+    users = [dict(zip(('id', 'username'), row)) for row in rows]
     return users
 
 
@@ -504,15 +501,22 @@ def search_posts_containing_hash_tag_query(hash_tag, logged_in_user_id):
 
 
 def get_most_likely_fraudulent_users_query():
-    query = """SELECT * FROM users WHERE
-    ((CURRENT_TIMESTAMP - (SELECT date FROM posts WHERE users.id = posts.user_id ORDER BY date LIMIT 1)) * 10 <= 
-    (SELECT COUNT(*) FROM posts WHERE posts.user_id = users.id) * (INTERVAL '1 day')) AND 
-    (SELECT COUNT(*) FROM posts WHERE posts.id IN (SELECT posts_likes.post_id FROM posts_likes WHERE posts_likes.user_id = users.id) GROUP BY posts.user_id) > 1;"""
+    query = """SELECT users.id, users.username FROM users WHERE 
+        ((SELECT COUNT(*) FROM posts WHERE users.id = posts.user_id) = 0 OR
+        ((CURRENT_TIMESTAMP - (SELECT date FROM posts WHERE users.id = posts.user_id ORDER BY date LIMIT 1)) * 10 <= 
+        (SELECT COUNT(*) FROM posts WHERE posts.user_id = users.id) * (INTERVAL '1 day')))
+        AND 
+        (2 * (SELECT COUNT(posts.user_id) AS liked_posts_of_a_user_count
+        FROM posts 
+        WHERE posts.id IN (SELECT posts_likes.post_id FROM posts_likes WHERE posts_likes.user_id = users.id)
+        GROUP BY posts.user_id
+        ORDER BY liked_posts_of_a_user_count DESC LIMIT 1) > (SELECT COUNT(posts_likes.id) FROM posts_likes WHERE posts_likes.user_id = users.id));"""
 
     cursor = get_database_connection()
     cursor.execute(query)
     rows = cursor.fetchall()
-    users = [dict(zip(('id', 'email', 'username', 'password', 'type', 'question_id', 'answer', 'bio'), row)) for row in rows]
+    users = [dict(zip(('id', 'username'), row)) for row in rows]
+
     return users
 
 
