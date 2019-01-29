@@ -366,13 +366,13 @@ def get_post_details_query(post_id, user_id):
     WHERE posts_likes.post_id = %s;""" % post_id
 
     if user_id:
-        q3_post_comments = """SELECT comments.date, comments.user_id, comments.parent_id, users.username,
+        q3_post_comments = """SELECT comments.id, comments.date, comments.user_id, comments.parent_id, users.username,
         (SELECT COUNT(*) FROM comments_likes WHERE comments_likes.comment_id = comments.id AND comments_likes.user_id = %s) 
         FROM comments 
         INNER JOIN users ON comments.user_id = users.id
         WHERE comments.post_id = %s;""" % (user_id, post_id)
     else:
-        q3_post_comments = """SELECT comments.date, comments.user_id, comments.parent_id, users.username
+        q3_post_comments = """SELECT comments.id, comments.date, comments.user_id, comments.parent_id, users.username
         FROM comments 
         INNER JOIN users ON comments.user_id = users.id
         WHERE comments.post_id = %s;""" % post_id
@@ -391,9 +391,20 @@ def get_post_details_query(post_id, user_id):
     cursor.execute(q3_post_comments)
     rows = cursor.fetchall()
     if user_id:
-        comments = [dict(zip(('date', 'user_id', 'parent_id', 'user_username', 'has_current_user_liked'), row)) for row in rows]
+        comments = [dict(zip(('id', 'date', 'user_id', 'parent_id', 'user_username', 'has_current_user_liked'), row)) for row in rows]
     else:
-        comments = [dict(zip(('date', 'user_id', 'parent_id', 'user_username'), row)) for row in rows]
+        comments = [dict(zip(('id', 'date', 'user_id', 'parent_id', 'user_username'), row)) for row in rows]
+
+    for i, _ in enumerate(comments):
+        if comments[i]['parent_id'] is None:
+            comments[i]['sub_comments'] = []
+            for j, _ in enumerate(comments):
+                if comments[j]['parent_id'] == comments[i]['id']:
+                    comments[i]['sub_comments'].append(comments[j])
+    for i, comment in enumerate(comments):
+        if comment['parent_id'] is not None:
+            del comments[i]
+
     result['post']['comments'] = comments
     result['post']['comments_count'] = len(comments)
 
@@ -506,12 +517,20 @@ def get_most_likely_fraudulent_users_query():
 
 
 def get_users_commented_more_than_10_times_under_more_than_3_posts_query():
-    query = """SELECT users.id, users.username 
-        FROM users
-        INNER JOIN posts ON (users.id IN (SELECT comments.user_id FROM comments WHERE comments.post_id = posts.id))
-        WHERE 
-    ORDER BY (SELECT COUNT(*) FROM comments WHERE comments.post_id = posts.id AND comments.user_id = users.user_id) DESC LIMIT 4)
-    ;"""
+    query = """SELECT users.id, users.username FROM users WHERE 
+        (SELECT COUNT(*) FROM 
+            (SELECT COUNT(comments.post_id) AS comments_count_in_each_post
+                FROM comments 
+                WHERE comments.user_id = users.id
+                GROUP BY comments.post_id
+            ) AS unique_posts
+        WHERE comments_count_in_each_post > 10
+        ) > 3;"""
+
+    cursor = get_database_connection()
+    cursor.execute(query)
+    users = cursor.fetchall()
+    return users
 
 
 def get_question_for_logged_in_user_query(user_id):

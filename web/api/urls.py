@@ -27,5 +27,6 @@ urlpatterns = [
     path('users/get_logged_in_question/', views.get_question_for_logged_in_user, name='get_question_for_logged_in_user'),
     path('users/get_forgotten_password/', views.get_forgotten_user_password, name='get_forgotten_user_password'),
     path('users/change_password/', views.change_user_password, name='change_user_password'),
+    path('users/commented_more_than_10_times_under_more_than_3_posts/', views.get_users_commented_more_than_10_times_under_more_than_3_posts, name='get_users_commented_more_than_10_times_under_more_than_3_posts'),
 
 ]
