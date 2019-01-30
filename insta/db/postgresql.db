@@ -15,7 +15,8 @@ create table "users"(
     type            user_type not null,
     question_id     int references questions(id) not null,
     answer          varchar not null,
-    bio             varchar
+    bio             varchar,
+    register_date   timestamp not null default current_timestamp
 );
 
 

@@ -1,4 +1,5 @@
 import psycopg2
+import datetime
 from insta.settings import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST
 
 
@@ -221,22 +222,44 @@ def get_users_followed_back_all_their_followers_query():
     return users
 
 
-def get_users_whose_following_users_are_active_query():
-    query = """SELECT users.id, users.username FROM users WHERE 
-    users.id 
-    IN 
-    (SELECT following_user_id FROM follows WHERE 
-        (follows.user_id = users.id) 
-        AND 
-        (follows.user_id IN 
-            (SELECT user_id FROM posts WHERE posts.date > NOW() - INTERVAL '24 hour')
-        )
-    );"""
+def is_user_active(user_id):
+    q1 = """SELECT register_date FROM users WHERE id = %s;""" % user_id
+    q2 = """SELECT posts.date FROM posts WHERE posts.user_id = %s;""" % user_id
 
+    cursor = get_database_connection()
+    cursor.execute(q1)
+    register_date = cursor.fetchone()
+
+    cursor.execute(q2)
+    posts_dates = cursor.fetchall()
+    if len(posts_dates) == 0:
+        return False
+
+    last_date = register_date[0]
+    for post_date in posts_dates:
+        if post_date[0] - last_date > datetime.timedelta(days=1):
+            return False
+        last_date = post_date[0]
+
+    return True
+
+
+def are_all_his_followings_active(user_id):
+    query = """SELECT following_user_id FROM follows WHERE user_id = %s;""" % user_id
+    cursor = get_database_connection()
+    cursor.execute(query)
+    following_users_ids = cursor.fetchall()
+    print(following_users_ids)
+    return all([is_user_active(following_user_id) for following_user_id in following_users_ids])
+
+
+def get_users_whose_following_users_are_active_query():
+    query = """SELECT id, username FROM users;"""
     cursor = get_database_connection()
     cursor.execute(query)
     rows = cursor.fetchall()
     users = [dict(zip(('id', 'username'), row)) for row in rows]
+    users = [user for user in users if are_all_his_followings_active(user_id=user['id'])]
     return users
 
 
