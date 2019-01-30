@@ -236,10 +236,10 @@ def is_user_active(user_id):
         return False
 
     last_date = register_date[0]
-    for post_date in posts_dates:
-        if post_date[0] - last_date > datetime.timedelta(days=1):
+    for date in posts_dates + [(datetime.datetime.now(), )]:
+        if date[0] - last_date > datetime.timedelta(days=1):
             return False
-        last_date = post_date[0]
+        last_date = date[0]
 
     return True
 
@@ -249,7 +249,8 @@ def are_all_his_followings_active(user_id):
     cursor = get_database_connection()
     cursor.execute(query)
     following_users_ids = cursor.fetchall()
-    print(following_users_ids)
+    if len(following_users_ids) == 0:
+        return False
     return all([is_user_active(following_user_id) for following_user_id in following_users_ids])
 
 
