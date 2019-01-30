@@ -99,21 +99,27 @@ def like_post_query(post_id, user_id):
     return post_likes_count[0]
 
 
-def is_he_liking_his_own_comment(comment_id, user_id):
+def is_he_liking_his_own_comment(user_id, comment_id):
+    print(user_id, comment_id)
     query = """SELECT COUNT(*) FROM comments WHERE id = %s AND user_id = %s;""" % (comment_id, user_id)
     cursor = get_database_connection()
     cursor.execute(query)
     row = cursor.fetchone()
-    return True if row[0] == 0 else False
+    print(row)
+    return True if row[0] == 1 else False
 
 
-def is_he_liking_the_comment_of_his_blocker(comment_id, user_id):
-    query = """SELECT COUNT(*) FROM comments WHERE comments.id = %s AND comments.user_id IN
-        (SELECT blocks.user_id FROM blocks WHERE blocks.blocked_user_id = %s);""" % (comment_id, user_id)
+def is_he_liking_the_comment_of_his_blocker_or_inversely(user_id, comment_id):
+    query = """SELECT COUNT(*) FROM comments WHERE comments.id = %s 
+    AND (
+        (comments.user_id IN (SELECT blocks.user_id FROM blocks WHERE blocks.blocked_user_id = %s))
+        OR
+        (%s IN (SELECT blocks.user_id FROM blocks WHERE blocks.blocked_user_id = comments.user_id))
+    );""" % (comment_id, user_id, user_id)
     cursor = get_database_connection()
     cursor.execute(query)
     row = cursor.fetchone()
-    return True if row[0] == 0 else False
+    return True if row[0] == 1 else False
 
 
 def like_comment_query(comment_id, user_id):
@@ -200,9 +206,13 @@ def get_user_type_query(user_id):
 
 def get_users_followed_back_all_their_followers_query():
     query = """SELECT users.id, users.username FROM users WHERE 
-    (SELECT user_id FROM follows WHERE following_user_id = users.id) 
-    IN 
-    (SELECT following_user_id FROM follows WHERE user_id = users.id);"""
+    (SELECT COUNT(user_id) FROM follows WHERE 
+        following_user_id = users.id
+        AND 
+        follows.user_id IN (SELECT following_user_id FROM follows WHERE user_id = users.id)
+    ) 
+    = 
+    (SELECT COUNT(user_id) FROM follows WHERE following_user_id = users.id);"""
 
     cursor = get_database_connection()
     cursor.execute(query)

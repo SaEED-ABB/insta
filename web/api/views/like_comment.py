@@ -11,11 +11,11 @@ def like_comment(request):
     if not user_id:
         return JsonResponse({'error': "please login first"}, status=403)
 
-    if not database.is_he_liking_his_own_comment(user_id=user_id, comment_id=comment_id):
+    if database.is_he_liking_his_own_comment(user_id=user_id, comment_id=comment_id):
         return JsonResponse({'error': "you can't like your own comment"}, status=400)
 
-    if not database.is_he_liking_the_comment_of_his_blocker(user_id=user_id, comment_id=comment_id):
-        return JsonResponse({'error': "you can't like the comment of your blocker"}, status=400)
+    if database.is_he_liking_the_comment_of_his_blocker_or_inversely(user_id=user_id, comment_id=comment_id):
+        return JsonResponse({'error': "you can't like the comment of your blocker or someone you have blocked"}, status=400)
 
     comment_likes_count = database.like_comment_query(comment_id=comment_id, user_id=user_id)
 
