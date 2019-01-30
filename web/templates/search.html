@@ -18,38 +18,8 @@
         <div class="row justify-content-center">
             <div class="col-4">
                 <div class="card" >
-                    <div class="card-body text-center">
-                        <a href="">
-                            <h5 class="card-title">پوریا صادقی</h5>
-                            <span class="f-s-12">@pooria</span>
-                        </a>
-                    </div>
                     <hr class="m-0" >
-                    <div class="card-body">
-                        <div class="row row-4">
-                            <div class="col-6 m-b-5">
-                                <a href="" class="w-100 float-right btn btn-success btn-sm" >
-                                    120 دنبال شونده
-                                </a>
-                            </div>
-                            <div class="col-6 m-b-5">
-                                <a href="" class="w-100 float-left btn btn-success btn-sm" >
-                                    120 دنبال کننده
-                                </a>
-                            </div>
-                            <div class="col-6">
-                                <a href="" class="w-100 float-right btn btn-success btn-sm" >
-                                    100 لایک
-                                </a>
-                            </div>
-                            <div class="col-6">
-                                <a href="" class="w-100 float-left btn btn-success btn-sm" >
-                                    20 پست
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="m-0" >
+
                     <div class="card-body">
                         <ul class="m-0 f-s-15" >
                             <li><a class=" m-b-10 d-block" href="" id="home">خانه</a></li>
@@ -102,6 +72,59 @@
 
 <script>
     window.onload = function () {
+
+        var url = window.location.href.split("=");
+        if(url[1] != null){
+
+            alert(url[1].replace("/",""));
+                 var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if (XML.status == 200 && XML.readyState == 4) {
+
+                        result = JSON.parse(this.response);
+                        console.log(result);
+                        var card = document.getElementById("card");
+                        while (card.firstChild) {
+                            card.removeChild(card.firstChild);
+                        }
+                        posts = result["posts"];
+                        for (var i in posts) {
+                            post = posts[i];
+                            console.log(post);
+                            id = post["id"];
+                            alert(id);
+                            element_maker("", "div", "card", "card-body", "card-body" + id);
+                            element_maker("", "div", "card-body" + id, "tweet", "tweet" + id);
+                            element_maker("", "div", "tweet" + id, "clearfix", "clearfix" + id);
+                            var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                            user_page.user_id = post["user_id"];
+                            user_page.onclick = get_user_page_info;
+                            var user_username = post["user_username"];
+                            element_maker(user_username,"span","username"+id,"username","");
+                            var date = post["date"];
+                            element_maker(date, "time", "clearfix" + id, "float-left", "");
+                            var context = post["context"];
+                            element_maker(context, "p", "tweet" + id, "text", "");
+                            element_maker("","ul","tweet"+id,"clearfix m-0 p-0","commentUl"+id);
+                            element_maker("","li","commentUl"+id,"float-left d-block","likeLi"+id);
+                            var a = element_maker("","a","likeLi"+id,"","likelink"+id);
+                            a.post_id = id;
+                            a.onclick = likeFunction;
+                            var likes_count = post["likes_count"];
+                            element_maker(" "+likes_count+" ","span","likelink"+id,"","likeSpan"+id);
+                            element_maker("","i","likelink"+id,"fa fa-heart","");
+                            element_maker("", "hr", "card", "m-0", "");
+                        }
+
+                    }
+                };
+
+                XML.open("GET", "/api/posts/search_for_hash_tag/?hash_tag_id=" + url[1].replace("/",""), true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                XML.send();
+
+
+        }
 
         var home = document.getElementById("home");
             home.onclick = function (e) {

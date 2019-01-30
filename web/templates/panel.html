@@ -29,6 +29,7 @@
                             <li><a class="m-b-10 d-block" href="" id="get_hottest_posts">دیدن داغ ترین بیانات </a></li>
                             <li><a class="m-b-10 d-block" href="" id="most_likely_fraudulent">مشاهده کاربران مشکوک به تقلب در لایک </a></li>
                             <li><a class="m-b-10 d-block" href="" id="followed_back_all_their_followers">مشاهده کاربرانی که تمام دنبال کنندگانشان را دنبال کرده اند </a></li>
+                            <li><a class="m-b-10 d-block" href="" id="get_users_commented_more_than_10_times_under_more_than_3_posts">مشاهده کاربرانی که تمام دنبال کنندگانشان را دنبال کرده اند </a></li>
                             <li><a class="m-b-10 d-block" href="">توئیت ها</a></li>
                             <li><a class=" m-b-10 d-block" href="">تغییر کلمه عبور</a></li>
                             <li><a class="" href="">خروج</a></li>
@@ -37,50 +38,8 @@
                 </div>
             </div>
             <div class="col">
+                <div class="card-header" id="card_header" ></div>
                 <div class="card" id="card" >
-{#                    <div class="card-body">#}
-{#                        <table class="table table-bordered table-hover table-striped" >#}
-{#                            <thead>#}
-{#                            <tr>#}
-{#                                <th>ردیف</th>#}
-{#                                <th>نام</th>#}
-{#                                <th>ایمیل</th>#}
-{#                                <th>توئیت ها</th>#}
-{#                                <th>دنبال شونده ها</th>#}
-{#                                <th>دنبال کننده ها</th>#}
-{#                                <th>#}
-{##}
-{#                                </th>#}
-{#                            </tr>#}
-{#                            </thead>#}
-{#                            <tbody>#}
-{#                            <tr>#}
-{#                                <td>1</td>#}
-{#                                <td>#}
-{#                                    <a href="">@pooria</a>#}
-{#                                </td>#}
-{#                                <td>test@test.com</td>#}
-{#                                <td>#}
-{#                                    <a href="">10</a>#}
-{#                                </td>#}
-{#                                <td>#}
-{#                                    <a href="">20</a>#}
-{#                                </td>#}
-{#                                <td>#}
-{#                                    <a href="">40</a>#}
-{#                                </td>#}
-{#                                <td>#}
-{#                                    <button type="button" class="btn btn-sm btn-outline-danger" >#}
-{#                                        Block#}
-{#                                    </button>#}
-{#                                    <button type="button" class="btn btn-sm btn-danger" >#}
-{#                                        Delete#}
-{#                                    </button>#}
-{#                                </td>#}
-{#                            </tr>#}
-{#                            </tbody>#}
-{#                        </table>#}
-{#                    </div>#}
                 </div>
             </div>
         </div>
@@ -101,6 +60,7 @@
                 if(this.readyState == 4 && this.status == 200 ){
                      result = JSON.parse(this.response);
                      console.log(result["posts"]["id"]);
+                    document.getElementById("card_header").innerText = " دیدن داغ ترین بیانات " ;
                      var card = document.getElementById("card");
                      while (card.firstChild) {
                          card.removeChild(card.firstChild);
@@ -151,6 +111,7 @@
                 if(this.readyState == 4 && this.status == 200){
                     var result = JSON.parse(this.response);
                     console.log(result);
+                    document.getElementById("card_header").innerText = " مشاهده کاربران مشکوک به تقلب در لایک " ;
                     var card = document.getElementById("card");
                      while (card.firstChild) {
                          card.removeChild(card.firstChild);
@@ -176,6 +137,45 @@
             XML.send();
         };
 
+        var get_users_commented_more_than_10_times_under_more_than_3_posts = document.getElementById("get_users_commented_more_than_10_times_under_more_than_3_posts");
+        get_users_commented_more_than_10_times_under_more_than_3_posts.onclick = function (ev) {
+            ev.preventDefault();
+            var XML = new XMLHttpRequest();
+            XML.onreadystatechange = function () {
+                if(this.readyState == 4 && this.status == 200){
+                    var result = JSON.parse(this.response);
+                    console.log(result);
+                    document.getElementById("card_header").innerText = "مشاهده کاربرانی که بیشتر از 10 دیدگاه زیر 3 بیان گذاشته اند " ;
+                    var card = document.getElementById("card");
+                     while (card.firstChild) {
+                         card.removeChild(card.firstChild);
+                     }
+
+                    users = result["users"];
+                    for (var i in users ) {
+                        user = users[i];
+                        id = user["id"];
+                        element_maker("", "div", "card", "card-body", "card-body" + id);
+                        element_maker("", "div", "card-body" + id, "tweet", "tweet" + id);
+                        element_maker("", "div", "tweet" + id, "clearfix", "clearfix" + id);
+                        var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                        user_page.user_id = user["id"];
+                        user_page.onclick = get_user_page_info;
+                        var user_username = user["username"];
+                        element_maker(user_username,"span","username"+id,"username","");
+
+                    }
+                }
+            };
+            XML.open("GET","/api/users/commented_more_than_10_times_under_more_than_3_posts/",true);
+            XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            XML.send();
+
+        };
+
+
+
+
         var followed_back_all_their_followers = document.getElementById("followed_back_all_their_followers");
         followed_back_all_their_followers.onclick = function (ev) {
             ev.preventDefault();
@@ -184,10 +184,12 @@
                 if(this.readyState == 4 && this.status == 200){
                     var result = JSON.parse(this.response);
                     console.log(result);
+                    document.getElementById("card_header").innerText = " مشاهده کاربرانی که تمام دنبال کنندگانشان را دنبال کرده اند " ;
                     var card = document.getElementById("card");
                      while (card.firstChild) {
                          card.removeChild(card.firstChild);
                      }
+
                     users = result["users"];
                     for (var i in users ) {
                         user = users[i];

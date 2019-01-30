@@ -131,31 +131,6 @@
             };
 
 
-
-
-
-            {#// edit#}
-            {#var comment = document.getElementById("comment");#}
-            {#comment.onclick = function () {#}
-            {#    var XML = new XMLHttpRequest();#}
-            {#    XML.onreadystatechange = function () {#}
-            {#        if(this.readyState == 4 && this.status == 200 ){#}
-            {#            var result = JSON.parse(this.response);#}
-            {#            alert(result);#}
-            {#        }#}
-            {#    };#}
-            {#    XML.open("POST","/api/",true);#}
-            {#    XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");#}
-            {#    var post_id = "1";#}
-            {#    var user_id =  "1";#}
-            {#    var  like = document.getElementById("likeCount");#}
-            {#        like.innerText=1;#}
-            {#        alert(like.innerText);#}
-            {#        var text = "post_id=" + post_id + "&user_id=" + user_id;#}
-            {#        XML.send(text);#}
-            //};
-
-            //edit posts
             var XML = new XMLHttpRequest();
             XML.onreadystatechange = function () {
                 if(XML.status == 200 && XML.readyState == 4){
@@ -188,10 +163,13 @@
                         var date = post["date"];
                         element_maker(date,"time","clearfix"+id,"float-left","");
                         var context = post["context"];
-                        element_maker(context, "p", "tweet"+id,"text","");
+                        var hash_tags = post["hash_tags"];
+                        element_maker("", "p", "tweet"+id,"text","").innerHTML = put_hashtags_to_post_html(context, hash_tags);
                         element_maker("","ul","tweet"+id,"clearfix m-0 p-0","commentUl"+id);
                         element_maker("","li","commentUl"+id,"float-left d-block m-r-15","commentLi"+id);
-                        element_maker("","a","commentLi"+id,"","commentlink"+id,"");
+                        var comment_a = element_maker("","a","commentLi"+id,"","commentlink"+id,"");
+                        comment_a.post_id = id;
+                        comment_a.onclick = commentFunction;
                         var comments_count = post["comments_count"];
                         element_maker(" "+comments_count+" ","span","commentlink"+id,"","");
                         element_maker("","i","commentlink"+id,"fa fa-comments","");
@@ -201,7 +179,11 @@
                         a.onclick = likeFunction;
                         var likes_count = post["likes_count"];
                         element_maker(" "+likes_count+" ","span","likelink"+id,"","likeSpan"+id);
-                        element_maker("","i","likelink"+id,"fa fa-heart","");
+                        if(post["has_current_user_liked"]==1) {
+                            element_maker("", "i", "likelink" + id, "fa fa-heart", "likeI"+id);
+                        }else {
+                            element_maker("", "i", "likelink" + id, "fa fa-heart-o", "likeI"+id);
+                        }
                         element_maker("","hr","card","m-0","");
                     }
 
@@ -212,6 +194,19 @@
             XML.send();
         };
 
+        function put_hashtags_to_post_html(context, hash_tags) {
+        var newContext = "" ;
+        var srart_index = 0;
+        var end_index;
+        for(var i in hash_tags){
+            var hash_tag = hash_tags[i]["hash_tag"];
+            end_index = context.indexOf(hash_tag);
+            newContext += context.substring(srart_index,end_index-1);
+            newContext += '<a href="http://localhost:8000/users/search/?hash_tag=' + hash_tag.substring(1,hash_tag.length) + '/">' + hash_tag + '</a>';
+            srart_index = end_index + hash_tag.length ;
+        }
+        return newContext;
+        }
 
 
        function get_user_page_info(e) {
@@ -252,13 +247,27 @@
                         console.log(result);
                         var likeSpan = document.getElementById("likeSpan"+id);
                         likeSpan.innerText = " " + result["post_likes_count"] + " ";
+                        if(document.getElementById("likeI"+id).classList.contains("fa-heart-o")){
+                            document.getElementById("likeI"+id).classList.remove("fa-heart-o");
+                            document.getElementById("likeI"+id).classList.add("fa-heart");
+                        }else{
+                            document.getElementById("likeI"+id).classList.add("fa-heart-o");
+                            document.getElementById("likeI"+id).classList.remove("fa-heart");
+
+                        }
                     }
                 };
                 XML.open("POST","/api/posts/like/",true);
                 XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                 var text = "post_id=" +id;
                 XML.send(text);
-            }
+       }
+
+       function  commentFunction(e) {
+            e.preventDefault();
+            window.location.replace("http://localhost:8000/posts/"+this.post_id);
+       }
+
 
     </script>
 

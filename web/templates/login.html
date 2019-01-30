@@ -30,7 +30,7 @@
                                             <input id="password" type="password" required minlength="6"
                                                    placeholder="کلمه عبور"
                                                    class="form-control">
-                                            <a href="" class="f-s-12">فراموشی رمز عبور</a>
+                                            <a href="" class="f-s-12" id="get_forgotten_user_password">فراموشی رمز عبور</a>
                                         </div>
                                     </div>
                                 </div>
@@ -57,6 +57,14 @@
 
 <script>
     window.onload = function () {
+        var get_forgotten_user_password = document.getElementById("get_forgotten_user_password");
+        get_forgotten_user_password.onclick = function (ev) {
+            ev.preventDefault();
+            window.location.replace("http://localhost:8000/users/get_forgotten_user_password/");
+
+        };
+
+
         var loginBTN = document.getElementById("loginBTN");
         loginBTN.onclick = function () {
             var result ;

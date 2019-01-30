@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>twitter</title>
+    <link rel="stylesheet" href="{% static 'assets/css/plugin.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+</head>
+<body>
+<div class="page-panel">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark text-center">
+        <p class="m-0 text-center w-100 text-white font-weight-bold f-s-20">
+            Nstagram
+        </p>
+    </nav>
+    <div class="container p-t-15 p-b-15">
+        <div class="row justify-content-center">
+            <div class="col-4">
+
+            </div>
+            <div class="col-6">
+                <div class="card m-b-15" id="card">
+                </div>
+
+                <div class="card"  id="comments_card">
+                    <div class="card-header" >نظرات</div>
+                    <div class="card-body">
+                        <div>
+                            <div class="form-group">
+                                <textarea class="form-control" rows="2" maxlength="1000" id="context"></textarea>
+                            </div>
+                            <div class="clearfix" >
+                                <div class="float-right" >
+                                    <span class="text-muted f-s-12 m-t-5 d-block" >1000 کاراکتر</span>
+                                </div>
+                                <div class="float-left" >
+                                    <button class="btn btn-outline-secondary btn-sm" id="send_button">ارسال</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="m-0" >
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'assets/js/lib/jquery.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/lib/popper.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/lib/bootstrap.js' %}" ></script>
+<script type="text/javascript" src="{% static 'assets/js/helper.js' %}" ></script>
+<script>
+    window.onload = function () {
+
+        var send_button = document.getElementById("send_button");
+        send_button.onclick = function () {
+            var XML = new XMLHttpRequest();
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 201 ){
+                         result = JSON.parse(this.response);
+                         window.location.replace(window.location.href);
+                    }
+                };
+                var context = document.getElementById("context").value;
+                XML.open("POST","/api/comments/create/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var text = "context=" + context +"&parent_id="+null+"&post_id="+url[url.length-2];
+                XML.send(text);
+        };
+
+
+
+        var url = window.location.href.split("/");
+        var XML = new XMLHttpRequest();
+        XML.onreadystatechange = function () {
+            if(XML.status == 200 && XML.readyState == 4) {
+                result = JSON.parse(this.response);
+                console.log(result);
+                var post = result['post'];
+
+                element_maker("","div","card","card-body","card-body");
+                element_maker("","div","card-body","tweet","tweet");
+                element_maker("","div","tweet","clearfix","clearfix");
+                var user_page = element_maker("","a","clearfix","name float-right","username");
+                user_page.user_id = post["user_id"];
+                user_page.onclick = get_user_page_info;
+                var user_username = post["user_username"];
+                element_maker(user_username,"span","username","username","");
+                var date = post["date"];
+                element_maker(date,"time","clearfix","float-left","");
+                var context = post["context"];
+                var hash_tags = post["hash_tags"];
+                element_maker("", "p", "tweet","text","").innerHTML = put_hashtags_to_post_html(context, hash_tags);
+                element_maker("","ul","tweet","clearfix m-0 p-0","commentUl");
+                element_maker("","li","commentUl","float-left d-block m-r-15","commentLi");
+                var comment_a = element_maker("","a","commentLi","","commentlink","");
+                comment_a.post_id = url[url.length-2];
+                comment_a.onclick = commentFunction;
+                var comments_count = post["comments_count"];
+                element_maker(" "+comments_count+" ","span","commentlink","","");
+                element_maker("","i","commentlink","fa fa-comments","");
+                element_maker("","li","commentUl","float-left d-block","likeLi");
+                var a = element_maker("","a","likeLi","","likelink");
+                a.post_id = url[url.length-2];
+                a.onclick = likeFunction;
+                var likes_count = post["likes_count"];
+                element_maker(" "+likes_count+" ","span","likelink","","likeSpan");
+                element_maker("","i","likelink","fa fa-heart","");
+                element_maker("","hr","card","m-0","");
+
+                comments = post["comments"];
+                for(var i in comments) {
+                        comment = comments[i];
+                        id = comment["id"];
+                        alert(id);
+                        element_maker("","div","comments_card","card-body","card-body"+id);
+                        element_maker("","div","card-body"+id,"tweet","tweet"+id);
+                        element_maker("","div","tweet"+id,"clearfix","clearfix"+id);
+                        var user_page = element_maker("","a","clearfix"+id,"name float-right","username"+id);
+                        user_page.user_id = comment["user_id"];
+                        user_page.onclick = get_user_page_info;
+                        var user_username = comment["user_username"];
+                        element_maker(user_username,"span","username"+id,"username","");
+                        var date = post["date"];
+                        element_maker(date,"time","clearfix"+id,"float-left","");
+                        var context = comment["context"];
+                        element_maker(context, "p", "tweet"+id,"text","");
+                        element_maker("","ul","tweet"+id,"clearfix m-0 p-0","commentUl"+id);
+                        element_maker("","li","commentUl"+id,"float-left d-block m-r-15","commentLi"+id);
+                        var comment_a = element_maker("","a","commentLi"+id,"","commentlink"+id,"");
+                        comment_a.post_id = id;
+                        comment_a.onclick = commentFunction;
+                        var comments_count = comment["comments_count"];
+                        element_maker(" "+comments_count+" ","span","commentlink"+id,"","");
+                        element_maker("","i","commentlink"+id,"fa fa-comments","");
+                        element_maker("","li","commentUl"+id,"float-left d-block","likeLi"+id);
+                        var a = element_maker("","a","likeLi"+id,"","likelink"+id);
+                        a.post_id = id;
+                        a.onclick = likeFunction;
+                        var likes_count = comment["likes_count"];
+                        element_maker(" "+likes_count+" ","span","likelink"+id,"","likeSpan"+id);
+                        if(post["has_current_user_liked"]==1) {
+                            element_maker("", "i", "likelink" + id, "fa fa-heart", "likeI"+id);
+                        }else {
+                            element_maker("", "i", "likelink" + id, "fa fa-heart-o", "likeI"+id);
+                        }
+                        element_maker("","hr","comments_card","m-0","");
+                }
+            }
+            };
+            XML.open("GET","/api/users/post_details/?post_id="+url[url.length-2], true);
+            XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            XML.send();
+    };
+
+    function put_hashtags_to_post_html(context, hash_tags) {
+        var newContext = "" ;
+        var srart_index = 0;
+        var end_index;
+        for(var i in hash_tags){
+            var hash_tag = hash_tags[i]["hash_tag"];
+            var hash_tag_id = hash_tags[i]["id"];
+            end_index = context.indexOf(hash_tag);
+            newContext += context.substring(srart_index,end_index-1);
+            newContext += '<a href="http://localhost:8000/users/search/?hash_tag=' + hash_tag_id + '/">' + hash_tag + '</a>';
+            srart_index = end_index + hash_tag.length ;
+        }
+        return newContext;
+    }
+
+    function get_user_page_info(e) {
+           e.preventDefault();
+           window.location.replace("http://localhost:8000/users/"+this.user_id+"/info/");
+       }
+
+       function element_maker(text ,type ,id_parent,className , id) {
+                var new_p = document.createElement(type);
+
+                if(type == "a"){
+                    new_p.href = "";
+                }
+                if(id != "") {
+                    new_p.id = id;
+                }
+                if(text != ""){
+                    var textnode = document.createTextNode(text);
+                    new_p.appendChild(textnode);
+                }
+                if(className != "") {
+                    var classlistSplit = className.split(" ");
+                    for (var i in classlistSplit) {
+                        new_p.classList.add(classlistSplit[i]);
+                    }
+                }
+                document.getElementById(id_parent).appendChild(new_p);
+                return new_p;
+       }
+
+    function  likeFunction(e) {
+                e.preventDefault();
+                var XML = new XMLHttpRequest();
+                id = this.post_id;
+                XML.onreadystatechange = function () {
+                    if(this.readyState == 4 && this.status == 201){
+                        var result = JSON.parse(this.response);
+                        console.log(result);
+                        var likeSpan = document.getElementById("likeSpan");
+                        likeSpan.innerText = " " + result["post_likes_count"] + " ";
+                    }
+                };
+                XML.open("POST","/api/posts/like/",true);
+                XML.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var text = "post_id=" +id;
+                XML.send(text);
+       }
+
+       function  commentFunction(e) {
+            e.preventDefault();
+            window.location.replace("http://localhost:8000/posts/"+this.post_id);
+       }
+
+</script>
+</body>
+</html>

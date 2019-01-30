@@ -26,8 +26,22 @@ def user_info(request, user_id):
 def login(request):
     return render(request, 'login.html')
 
+
 def search(request):
     return render(request, 'search.html')
 
+
+def search2(request, hash_tag):
+    return render(request, 'search.html', {'hash_tag': hash_tag})
+
+
 def panel(request):
     return render(request, 'panel.html')
+
+
+def post_detail(request, post_id):
+    return render(request, 'tweet.html')
+
+
+def get_forgotten_user_password(request):
+    return render(request,'get_forgotten_user_password.html')
